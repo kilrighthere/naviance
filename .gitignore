@@ -1,0 +1,38 @@
+# Environment files
+.env
+.env.*
+!.env.example
+.env.*.local
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor/OS
+.DS_Store
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# TypeScript/Vite
+*.tsbuildinfo
+.eslintcache
+*.timestamp-*-*.mjs
+
+# Local credentials
+.npmrc
+*.pem
+*.key
+*.crt
