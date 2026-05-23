@@ -6,6 +6,8 @@ import type { Session, User } from "@supabase/supabase-js";
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null);
     const session = ref<Session | null>(null);
+    const authError = ref<string | null>(null);
+    const isLoading = ref(false)
 
     const token = computed(() => session.value?.access_token || null);
     const isAuthenticated = computed(() => !!user.value)
@@ -31,35 +33,84 @@ export const useAuthStore = defineStore('auth', () => {
     // }
 
     async function login(email: string, password:string) {
-       const { data, error } = await supabase.auth.signInWithPassword({email, password});
+        isLoading.value = true
+        authError.value = null;
 
-       if(error) {
-        throw error
-       }
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-       session.value = data.session;
-       user.value = data.user;
-       
+            if (error) {
+                authError.value = error.message;
+                throw error;
+            }
+
+            session.value = data.session;
+            user.value = data.user;
+        } catch (error) {
+            if (!authError.value && error instanceof Error) {
+                authError.value = error.message;
+            }
+            throw error;
+        } finally {
+            isLoading.value = false;
+        }
     }
 
-    async function register(email:string, password: string) {
-        const { data, error } = await supabase.auth.signUp({email, password});
+    async function register(email:string, password: string, metedata: { nama_lengkap: string}) {
+        isLoading.value = true;
+        authError.value = null;
 
-        if (error) {
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: metedata
+                }
+            });
+
+            if (error) {
+                authError.value = error.message;
+                throw error;
+            }
+
+            if (data.session) {
+                await supabase.auth.signOut();
+            }
+
+            session.value = null;
+            user.value = null;
+        } catch (error) {
+            if (!authError.value && error instanceof Error) {
+                authError.value = error.message;
+            }
             throw error;
+        } finally {
+            isLoading.value = false;
         }
-
-        session.value = data.session;
-        user.value = data.user;
     }
 
     async function logout() {
-        const {error} = await supabase.auth.signOut();
-        if (error) {
+        isLoading.value = true;
+        authError.value = null;
+
+        try {
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+                authError.value = error.message;
+                throw error;
+            }
+
+            session.value = null;
+            user.value = null;
+        } catch (error) {
+            if (!authError.value && error instanceof Error) {
+                authError.value = error.message;
+            }
             throw error;
+        } finally {
+            isLoading.value = false;
         }
-        session.value = null;
-        user.value = null;
     }
 
     return {
@@ -70,6 +121,7 @@ export const useAuthStore = defineStore('auth', () => {
         initializeAuth,
         login,
         register,
-        logout
+        logout,
+        authError
     }
 })
