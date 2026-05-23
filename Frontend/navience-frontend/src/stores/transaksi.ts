@@ -1,0 +1,333 @@
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import { supabase } from "@/services/supabase";
+import type { Transaksi, JenisTransaksi } from "@/types/transaksi";
+
+export const useTransaksiStore = defineStore('transaksi', () => {
+    const items = ref<Transaksi[]>([]);
+    const selected = ref<Transaksi | null>(null);
+    const payload = ref<Partial<Transaksi>>({
+        id_pengguna: '',
+        id_target: null,
+        nama_transaksi: null,
+        tanggal_transaksi: '',
+        nominal: 0,
+        jenis_transaksi: 'pengeluaran' as JenisTransaksi,
+        nama_toko: null,
+        deskripsi: null,
+        id_kategori: ''
+    });
+    const isLoading = ref(false)
+    const storeError = ref<string | null>(null);
+    const searchQuery = ref('');
+    const sortNominal = ref<'asc' | 'desc' | ''>('');
+
+    const hasItems = computed(() => items.value.length > 0)
+    const totalNominal = computed(() => {
+        const nominal = items.value.map(item => item.nominal);
+        return nominal.reduce((sum, value) => sum + value, 0);
+    })
+    
+    const transaksiByJenis = computed(() => {
+        return items.value.reduce<Record<string, Transaksi[]>>((result, item) => {
+            const key = item.jenis_transaksi;
+            if (!result[key]) {
+                result[key] = [];
+            }
+            result[key].push(item);
+            return result;
+        }, {});
+    })
+
+    const filteredItems = computed(() => {
+        const keyword = searchQuery.value.trim().toLowerCase();
+        if (!keyword) {
+            return items.value;
+        }
+
+        return items.value.filter(item => {
+            const nama = item.nama_transaksi?.toLowerCase() ?? '';
+            const deskripsi = item.deskripsi?.toLowerCase() ?? '';
+            return nama.includes(keyword) || deskripsi.includes(keyword);
+        });
+    })
+
+    const sortedItems = computed(() => {
+        const list = [...filteredItems.value];
+        if (!sortNominal.value) {
+            return list;
+        }
+
+        return list.sort((a, b) => {
+            return sortNominal.value === 'asc'
+                ? a.nominal - b.nominal
+                : b.nominal - a.nominal;
+        });
+    })
+
+    const setLoading = (value: boolean) => {
+        isLoading.value = value;
+    };
+    const setError = (value: string | null) => {
+        storeError.value = value;
+    }
+
+    const setSearchQuery = (value: string) => {
+        searchQuery.value = value;
+    }
+
+    const setSortNominal = (value: 'asc' | 'desc' | '') => {
+        sortNominal.value = value;
+    }
+
+    const setPayload = (value: Partial<Transaksi>) => {
+        payload.value = { ...payload.value, ...value };
+    }
+
+    const resetPayload = () => {
+        payload.value = {
+            id_pengguna: '',
+            id_target: null,
+            nama_transaksi: null,
+            tanggal_transaksi: '',
+            nominal: 0,
+            jenis_transaksi: 'pengeluaran' as JenisTransaksi,
+            nama_toko: null,
+            deskripsi: null,
+            id_kategori: ''
+        };
+    }
+
+    const validatePayload = (value: Partial<Transaksi>) => {
+        if (!value.tanggal_transaksi) {
+            return 'Tanggal transaksi wajib diisi.';
+        }
+        if (Number.isNaN(Date.parse(value.tanggal_transaksi))) {
+            return 'Format tanggal transaksi tidak valid.';
+        }
+        if (!value.id_kategori) {
+            return 'Kategori wajib dipilih.';
+        }
+        if (value.nominal === undefined || value.nominal === null) {
+            return 'Nominal wajib diisi.';
+        }
+        if (typeof value.nominal !== 'number' || value.nominal <= 0) {
+            return 'Nominal harus lebih dari 0.';
+        }
+        if (!value.jenis_transaksi) {
+            return 'Jenis transaksi wajib dipilih.';
+        }
+        if (value.nama_transaksi && value.nama_transaksi.trim().length < 3) {
+            return 'Nama transaksi minimal 3 karakter.';
+        }
+        return null;
+    }
+
+    // TODO: actions CRUD
+    // - fetchAll (optionally by id_pengguna)
+    async function fetchAll(userId: string) {
+        setLoading(true);
+        setError(null);
+        try {
+            const { data, error } = await supabase
+            .from('transaksi')
+            .select('*')
+            .eq('id_pengguna', userId)
+
+            if (error) {
+                setError(error.message);
+                throw error;
+            }
+            items.value=data;
+        } catch (error) {
+            if (!storeError.value && error instanceof Error) {
+                setError(error.message)
+            }
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
+    // - fetchById(id_transaksi)
+    async function fetchById(userId: string, transaksiId: string) {
+        setLoading(true);
+        setError(null);
+        try {
+            const { data, error } = await supabase
+                .from('transaksi')
+                .select('*')
+                .eq('id_pengguna', userId)
+                .eq('id_transaksi', transaksiId)
+                .single();
+
+            if (error) {
+                storeError.value = error.message;
+                throw error;
+            }
+            selected.value = data;
+        } catch (error) {
+            if (!storeError.value && error instanceof Error) {
+                setError(error.message)
+            }
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
+    // - create(payload)
+    async function createTransaksi(userId: string, payload: Partial<Transaksi>) {
+        setLoading(true);
+        setError(null);
+
+        const validationError = validatePayload(payload);
+        if (validationError) {
+            setError(validationError);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+            .from('transaksi')
+            .insert({
+                id_pengguna: userId,
+                id_target: payload.id_target ?? null,
+                nama_transaksi: payload.nama_transaksi ?? null,
+                tanggal_transaksi: payload.tanggal_transaksi,
+                nominal: payload.nominal,
+                jenis_transaksi: payload.jenis_transaksi,
+                nama_toko: payload.nama_toko ?? null,
+                deskripsi: payload.deskripsi ?? null,
+                id_kategori: payload.id_kategori
+            })
+            .select('*')
+            .single();
+
+            if (error) {
+                setError(error.message);
+                throw error;
+            }
+            resetPayload();
+            if (data) {
+                items.value = [data, ...items.value];
+            }
+        } catch (error) {
+            if (!storeError.value && error instanceof Error) {
+                setError(error.message)
+            }
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+
+
+    // - update(id_transaksi, payload)
+    async function updateTransaksi(userId: string, transaksiId: string, payload: Partial<Transaksi>) {
+        setLoading(true);
+        setError(null);
+
+        const validationError = validatePayload(payload);
+        if (validationError) {
+            setError(validationError);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+            .from('transaksi')
+            .update({
+                id_pengguna: userId,
+                id_target: payload.id_target ?? null,
+                nama_transaksi: payload.nama_transaksi ?? null,
+                tanggal_transaksi: payload.tanggal_transaksi,
+                nominal: payload.nominal,
+                jenis_transaksi: payload.jenis_transaksi,
+                nama_toko: payload.nama_toko ?? null,
+                deskripsi: payload.deskripsi ?? null,
+                id_kategori: payload.id_kategori
+            })
+            .eq('id_transaksi', transaksiId)
+            .eq('id_pengguna', userId)
+            .select('*')
+            .single();
+
+            if (error) {
+                setError(error.message);
+                throw error;
+            }
+            resetPayload();
+            if (data) {
+                const nextItems = items.value.map(item =>
+                    item.id_transaksi === data.id_transaksi ? data : item
+                );
+                items.value = nextItems;
+            }
+        } catch (error) {
+            if (!storeError.value && error instanceof Error) {
+                setError(error.message)
+            }
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+
+    }
+    // - remove(id_transaksi)
+    async function deleteTransaksi(userId: string, transaksiId:string) {
+        setLoading(true);
+        setError(null);
+        try {
+            const { data, error } = await supabase
+            .from('transaksi')
+            .delete()
+            .eq('id_pengguna', userId)
+            .eq('id_transaksi', transaksiId)
+            .select('id_transaksi')
+            .single();
+            if (error) {
+                setError(error.message);
+                throw error;
+            }
+            items.value = items.value.filter(item => item.id_transaksi !== transaksiId);
+        } catch (error) {
+            if (!storeError.value && error instanceof Error) {
+                setError(error.message)
+            }
+            throw error;
+        }finally{
+            setLoading(false);
+        }
+    }
+
+    
+
+    // TODO: return state/getters/actions
+    return {
+        items,
+        selected,
+        payload,
+        isLoading,
+        storeError,
+        searchQuery,
+        sortNominal,
+        hasItems,
+        totalNominal,
+        transaksiByJenis,
+        filteredItems,
+        sortedItems,
+        setLoading,
+        setError,
+        setSearchQuery,
+        setSortNominal,
+        setPayload,
+        resetPayload,
+        fetchAll,
+        fetchById,
+        createTransaksi,
+        updateTransaksi,
+        deleteTransaksi
+    }
+})
