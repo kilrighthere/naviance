@@ -65,6 +65,79 @@ export const useTransaksiStore = defineStore('transaksi', () => {
         });
     })
 
+    const pengeluaranByKategoriBulanAktif = computed(() => {
+        const now = new Date();
+        const ym = now.toISOString().slice(0, 7);
+        const map = new Map<string, number>();
+
+        for (const item of items.value) {
+            if (item.jenis_transaksi !== 'pengeluaran') continue;
+            if (item.tanggal_transaksi.slice(0, 7) !== ym) continue;
+
+            map.set(item.id_kategori, (map.get(item.id_kategori) ?? 0) + item.nominal);
+        }
+
+        return map;
+    })
+
+    type ApexRingkasanBulanan = {
+        categories: string[];
+        yearMarkers: { index: number; year: number }[];
+        series: { name: string; data: number[] }[];
+    };
+
+    const ringkasan6BulanApex = computed<ApexRingkasanBulanan>(() => {
+        const now = new Date();
+        const months = Array.from({ length: 6 }, (_, index) => {
+            const d = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1);
+            const year = d.getFullYear();
+            const monthNumber = String(d.getMonth() + 1).padStart(2, '0');
+            return {
+                key: `${year}-${monthNumber}`,
+                label: d.toLocaleString('id-ID', { month: 'short' }),
+                year
+            };
+        });
+
+        const map = new Map<string, { pemasukan: number; pengeluaran: number }>();
+        months.forEach(month => {
+            map.set(month.key, { pemasukan: 0, pengeluaran: 0 });
+        });
+
+        for (const item of items.value) {
+            const key = item.tanggal_transaksi.slice(0, 7);
+            const row = map.get(key);
+            if (!row) continue;
+
+            if (item.jenis_transaksi === 'pemasukan') {
+                row.pemasukan += item.nominal;
+            } else if (item.jenis_transaksi === 'pengeluaran') {
+                row.pengeluaran += item.nominal;
+            }
+        }
+
+        const categories = months.map(month => month.label);
+        const yearMarkers = months.reduce<{ index: number; year: number }[]>((acc, month, index) => {
+            const prevYear = index === 0 ? null : months[index - 1]?.year ?? null;
+            if (prevYear !== month.year) {
+                acc.push({ index, year: month.year });
+            }
+            return acc;
+        }, []);
+
+        const pemasukanData = months.map(month => map.get(month.key)?.pemasukan ?? 0);
+        const pengeluaranData = months.map(month => map.get(month.key)?.pengeluaran ?? 0);
+
+        return {
+            categories,
+            yearMarkers,
+            series: [
+                { name: 'Pemasukan', data: pemasukanData },
+                { name: 'Pengeluaran', data: pengeluaranData }
+            ]
+        };
+    });
+
     const setLoading = (value: boolean) => {
         isLoading.value = value;
     };
@@ -318,6 +391,8 @@ export const useTransaksiStore = defineStore('transaksi', () => {
         transaksiByJenis,
         filteredItems,
         sortedItems,
+        pengeluaranByKategoriBulanAktif,
+        ringkasan6BulanApex,
         setLoading,
         setError,
         setSearchQuery,

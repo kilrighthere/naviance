@@ -1,12 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '@/services/supabase'
 
+import Landing from '@/views/Landing.vue'
 import Login from '@/views/Login.vue'
 import Register from '@/views/Register.vue'
 import Dashboard from '@/views/Dashboard.vue'
 
 
 const routes = [
+  {
+    path: '/',
+    component: Landing
+  },
   {
     path: '/login',
     component: Login,
@@ -22,7 +27,7 @@ const routes = [
     }
   },
   {
-    path: '/',
+    path: '/dashboard/:userId',
     component: Dashboard,
     meta: {
       requiresAuth: true
@@ -39,9 +44,14 @@ router.beforeEach(async (to, from, next) => {
   const {
     data: { session }
   } = await supabase.auth.getSession()
+  const userId = session?.user?.id
 
-  if (to.meta.requiresGuest && session) {
-    return next({ path: '/' })
+  if (to.path === '/' && userId) {
+    return next({ path: `/dashboard/${userId}` })
+  }
+
+  if (to.meta.requiresGuest && userId) {
+    return next({ path: `/dashboard/${userId}` })
   }
 
   if (
@@ -49,9 +59,14 @@ router.beforeEach(async (to, from, next) => {
     !session
   ) {
     next('/login')
-  } else {
-    next()
+    return
   }
+
+  if (to.meta.requiresAuth && userId && to.params.userId !== userId) {
+    return next({ path: `/dashboard/${userId}` })
+  }
+
+  next()
 })
 
 export default router
