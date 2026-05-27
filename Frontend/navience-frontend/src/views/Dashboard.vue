@@ -7,6 +7,7 @@ import { useAnggaranStore } from '@/stores/anggaran';
 import ApexChart from 'vue3-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import Sidebar from '@/components/sidebar.vue';
+import ChatBot from '@/components/chatBot.vue';
 
 const transaksiStore = useTransaksiStore();
 const authStore = useAuthStore();
@@ -424,14 +425,7 @@ watch(userID, (id) => {
         <div class="h-16"></div>
       </main>
 
-      <!-- Global Component: Floating AI Chatbot -->
-      <button
-        id="btn-ai-chatbot"
-        class="fixed bottom-8 right-8 z-50 h-14 px-6 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center gap-3 hover:scale-105 hover:shadow-xl transition-all duration-200 group animate-pulse-custom"
-      >
-        <span class="material-symbols-outlined text-3xl group-hover:hidden">smart_toy</span>
-        <span class="font-label-md text-label-md">Tanya AI Naviance</span>
-      </button>
+      <ChatBot id="btn-ai-chatbot" />
     </div>
   </div>
 </template>

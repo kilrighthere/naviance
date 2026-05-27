@@ -5,6 +5,7 @@ import Landing from '@/views/Landing.vue'
 import Login from '@/views/Login.vue'
 import Register from '@/views/Register.vue'
 import Dashboard from '@/views/Dashboard.vue'
+import Profile from '@/views/Profile.vue'
 
 
 const routes = [
@@ -29,6 +30,13 @@ const routes = [
   {
     path: '/dashboard/:userId',
     component: Dashboard,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/profile/:userId',
+    component: Profile,
     meta: {
       requiresAuth: true
     }
