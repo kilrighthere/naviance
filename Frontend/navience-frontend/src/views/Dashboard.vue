@@ -31,6 +31,10 @@ const periodeAktif = computed(() => {
   return now.toISOString().slice(0, 7);
 });
 
+const logoutHandler = () => {
+  authStore.logout();
+};
+
 const totalSisaAnggaran = computed(() => {
   const aktif = anggaranItems.value.filter(item => item.periode.slice(0, 7) === periodeAktif.value);
   const kategoriAktif = new Set(aktif.map(item => item.id_kategori));
@@ -119,6 +123,7 @@ watch(userID, (id) => {
       />
     </div>
   </section>
+  <button @click="logoutHandler"> logout</button>
 </template>
 
 <style scoped>
