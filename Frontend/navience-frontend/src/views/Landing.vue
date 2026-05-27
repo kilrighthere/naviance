@@ -1,825 +1,241 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-
-const isChatOpen = ref(false)
-const toggleChat = () => { isChatOpen.value = !isChatOpen.value }
-const closeChat  = () => { isChatOpen.value = false }
-
-const baseCards = [
-    { icon: 'edit_note',        color: 'primary',   accent: false, title: 'Manual Control',       desc: 'Take full command of your ledger with precision entry tools designed for speed and absolute accuracy.' },
-    { icon: 'document_scanner', color: 'tertiary',  accent: true,  title: 'Intelligent OCR',      desc: 'Instantly convert receipts and invoices into structured data using our high-fidelity optical recognition engine.' },
-    { icon: 'smart_toy',        color: 'secondary', accent: false, title: 'AI Chatbot',            desc: 'Converse with your finances. Ask complex queries and receive actionable intelligence in natural language.' },
-    { icon: 'analytics',        color: 'primary',   accent: false, title: 'Adaptive Planning',     desc: 'AI-driven money management recommendations based on your unique targets and real-time spending patterns.' },
-    { icon: 'timeline',         color: 'tertiary',  accent: false, title: 'Forecasting Spending',  desc: 'Predict your next month\'s requirements with category-specific mapping and intelligent trend analysis.' },
-]
-
-// Duplicate for seamless infinite loop
-const tickerCards = computed(() => [...baseCards, ...baseCards])
+import { useRouter } from 'vue-router'
+const router = useRouter()
 </script>
 
-
 <template>
-    <div class="landing-root">
+  <div class="bg-surface text-on-surface font-body-md antialiased selection:bg-secondary-container selection:text-on-secondary-container relative min-h-screen">
+    <!-- Background Pattern Overlay -->
+    <div class="fixed inset-0 pointer-events-none bg-pattern z-0 mix-blend-multiply"></div>
+    
+    <!-- TopAppBar -->
+    <header class="bg-surface/80 backdrop-blur-xl dark:bg-surface-container/80 text-primary dark:text-primary-fixed sticky top-0 w-full z-50 border-b border-outline-variant/30 shadow-sm relative z-50">
+      <div class="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+        <div class="flex items-center gap-3 cursor-pointer opacity-100 transition-all hover:opacity-80">
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+          <div class="flex flex-col">
+            <span class="font-headline-md text-headline-md font-extrabold tracking-tight text-primary dark:text-primary-fixed leading-none">Naviance</span>
+            <span class="font-label-sm text-[10px] uppercase tracking-[0.1em] text-on-surface-variant font-bold">Navigate Your Finance</span>
+          </div>
+        </div>
+        <nav class="hidden md:flex items-center gap-8">
+          <a class="text-on-surface-variant dark:text-on-surface-variant font-medium hover:text-secondary transition-colors duration-200" href="#features">Features</a>
+          <a class="text-on-surface-variant dark:text-on-surface-variant font-medium hover:text-secondary transition-colors duration-200" href="#about">About</a>
+          <a class="text-on-surface-variant dark:text-on-surface-variant font-medium hover:text-secondary transition-colors duration-200" href="#pricing">Pricing</a>
+        </nav>
+        <div class="flex items-center gap-4">
+          <button @click="router.push('/login')" class="hidden md:block font-label-md text-label-md text-primary hover:text-secondary transition-colors duration-200">Login</button>
+          <button @click="router.push('/register')" class="bg-primary text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-full hover:bg-primary/90 transition-all active:scale-[0.98] shadow-sm">Get Started</button>
+        </div>
+      </div>
+    </header>
 
-        <!-- ── Navigation ── -->
-        <header class="nav">
-            <div class="nav-inner">
-                <div class="brand">
-                    <div class="logo-mark">N</div>
-                    <span class="brand-name">Naviance</span>
-                </div>
-                <nav class="nav-links">
-                    <button class="btn-ghost" type="button" @click="$router.push('/login')">Login</button>
-                    <button class="btn-cta" type="button" @click="$router.push('/register')">Get Started</button>
-                </nav>
+    <main class="relative z-10">
+      <!-- Hero Section -->
+      <section class="relative pt-16 pb-20 px-margin-mobile md:px-margin-desktop overflow-hidden bg-gradient-to-br from-surface to-surface-container-low">
+        <!-- Background decorative gradient -->
+        <div class="absolute top-0 right-0 w-3/4 h-full bg-gradient-to-bl from-primary-fixed/20 via-tertiary-fixed-dim/10 to-transparent -z-10 rounded-bl-[120px] opacity-80 blur-3xl"></div>
+        <div class="absolute top-1/4 left-0 w-1/3 h-1/2 bg-gradient-to-tr from-secondary-container/10 to-transparent -z-10 rounded-full blur-3xl"></div>
+        
+        <div class="max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="flex flex-col gap-5 max-w-xl">
+            <div class="inline-flex items-center gap-2 bg-secondary-container/20 text-secondary-container px-4 py-1.5 rounded-full w-fit border border-secondary-container/30 shadow-sm">
+              <span class="material-symbols-outlined text-sm">auto_awesome</span>
+              <span class="font-label-md text-label-md">AI Financial Tracker</span>
             </div>
-        </header>
-
-        <!-- ── Hero ── -->
-        <main class="main">
-            <section class="hero">
-
-                <!-- Left column -->
-                <div class="hero-left">
-                    <div class="badge">
-                        <span class="badge-icon material-symbols-outlined">auto_awesome</span>
-                        <span class="badge-text">NEXT-GEN FINANCIAL INTELLIGENCE</span>
-                    </div>
-
-                    <h1 class="hero-heading">
-                        Secure <em>Solutions</em> for Smarter Money Moves.
-                    </h1>
-
-                    <p class="hero-sub">
-                        Our platform helps you manage, track, and optimize your finances with ease —
-                        all backed by bank-level security and real-time AI-driven insights.
-                    </p>
-
-                    <div class="snapshot animate-float">
-                        <div class="snapshot-top">
-                            <span class="snapshot-label">Your Financial Snapshot</span>
-                            <span class="material-symbols-outlined snapshot-more">more_vert</span>
-                        </div>
-                        <div class="snapshot-row">
-                            <div class="snapshot-stat">
-                                <span class="stat-period">THIS MONTH</span>
-                                <div class="stat-amount-row">
-                                    <span class="stat-amount">$3,570.00</span>
-                                    <span class="material-symbols-outlined stat-trend">trending_up</span>
-                                </div>
-                            </div>
-                            <p class="snapshot-note">
-                                Our platform helps you manage, track, and optimize your finances instantly.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right column: bento images -->
-                <div class="hero-right">
-                    <div class="bento">
-                        <div class="bento-pair">
-                            <div class="bento-card bento-a">
-                                <img src="@/assets/image/image-01.png" alt="Financial Analysts" />
-                            </div>
-                            <div class="bento-card bento-b">
-                                <img src="@/assets/image/image-02.png" alt="Success Mindset" />
-                            </div>
-                        </div>
-                        <div class="bento-card bento-c">
-                            <img src="@/assets/image/image-03.png" alt="Team Collaboration" />
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ── Features Ticker ── -->
-            <section class="features">
-                <div class="ticker-track">
-                    <div
-                        v-for="card in tickerCards"
-                        :key="card.title"
-                        class="feature-card"
-                        :class="card.accent ? 'feature-card--accent' : ''"
-                    >
-                        <div class="feature-icon" :class="`feature-icon--${card.color}`">
-                            <span class="material-symbols-outlined">{{ card.icon }}</span>
-                        </div>
-                        <h3 class="feature-title">{{ card.title }}</h3>
-                        <p class="feature-body">{{ card.desc }}</p>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- ── Floating AI Button ── -->
-        <button class="fab" type="button" @click="toggleChat" :aria-label="isChatOpen ? 'Close chat' : 'Open chat'">
-            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">smart_toy</span>
-        </button>
-
-        <!-- ── Chat Panel ── -->
-        <Transition name="chat">
-            <div v-if="isChatOpen" class="chat-panel">
-                <div class="chat-header">
-                    <div class="chat-header-info">
-                        <span class="material-symbols-outlined chat-bot-icon">smart_toy</span>
-                        <span class="chat-header-title">Naviance AI</span>
-                    </div>
-                    <button class="chat-close" type="button" @click="closeChat">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                </div>
-                <div class="chat-messages">
-                    <div class="chat-bubble chat-bubble--ai">
-                        Hello! I'm your AI financial assistant. How can I help you optimize your portfolio today?
-                    </div>
-                </div>
-                <div class="chat-footer">
-                    <div class="chat-input-row">
-                        <input class="chat-input" placeholder="Ask anything…" type="text" />
-                        <button class="chat-send" type="button">
-                            <span class="material-symbols-outlined">send</span>
-                        </button>
-                    </div>
-                </div>
+            
+            <p class="font-label-md text-label-md text-secondary font-bold uppercase tracking-widest mb-1">Navigate Your Finance</p>
+            
+            <h1 class="font-display-lg text-display-lg text-primary leading-tight">
+                Kuasai Keuanganmu dengan Kecerdasan AI
+            </h1>
+            
+            <p class="font-body-lg text-body-lg text-on-surface-variant text-balance">
+                Naviance membantu mahasiswa dan profesional muda mengelola keuangan secara otomatis dengan teknologi OCR dan prediksi AI yang presisi. Tinggalkan cara manual, mulai kendalikan masa depanmu.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 mt-2">
+              <button @click="router.push('/register')" class="bg-primary text-on-primary font-label-md text-label-md px-8 py-3.5 rounded-full hover:bg-primary/90 transition-all active:scale-[0.98] shadow-lg shadow-primary/20">
+                  Mulai Gratis Sekarang
+              </button>
+              <button class="bg-surface-container-lowest text-primary border border-outline-variant/60 font-label-md text-label-md px-8 py-3.5 rounded-full hover:bg-surface-container transition-all active:scale-[0.98] shadow-sm">
+                  Lihat Demo
+              </button>
             </div>
-        </Transition>
+          </div>
+          
+          <!-- Hero Image/Mockup -->
+          <div class="relative w-full aspect-square md:aspect-[4/3] rounded-3xl bg-surface-container-lowest shadow-xl border border-outline-variant/40 overflow-visible group">
+            <!-- Soft Glow Behind Image -->
+            <div class="absolute -inset-4 bg-gradient-to-r from-primary/10 to-tertiary/10 rounded-3xl blur-2xl -z-10"></div>
+            
+            <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 rounded-3xl" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCZRWRXrHOHZAoML-n2TsfF73JLOcFXhc2Rep1lm6phh2zzyl0T9B7EJXbYlWzB8skzrCI1egq4wpx1U5vVId924W6GpbkBqkFxMbqDvhqwCp37GD0b6w_uezSnPXwMnPRERVE58hHbLs3j8WrVDjWqPeZ-WSzuerWwsKhgv8Wo0tZzLVaVQr6_0_c8YcvpwL5kGsy32VaV8bTIuXVeondnPsRi6O5HUT29qgcsrzOdPLvBenI7xZ69oPpmsb5LMhYBWrXd8o3TeQI');">
+            </div>
+            
+            <!-- Glassmorphism Floating Element -->
+            <div class="absolute bottom-6 -left-6 md:left-6 bg-surface-container-lowest/80 backdrop-blur-lg border border-white/60 p-4 rounded-xl shadow-xl flex items-center gap-4 w-64 animate-bounce" style="animation-duration: 4s;">
+              <div class="w-10 h-10 rounded-full bg-tertiary-fixed-dim/20 flex items-center justify-center text-tertiary-fixed-dim">
+                <span class="material-symbols-outlined">trending_up</span>
+              </div>
+              <div>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">Prediksi Saldo</p>
+                <p class="font-headline-md text-headline-md text-primary">Rp 4.500.000</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Decorative Divider -->
+      <div class="w-full flex justify-center -mt-8 relative z-20">
+        <div class="w-24 h-1 bg-gradient-to-r from-transparent via-outline-variant to-transparent rounded-full"></div>
+      </div>
+      
+      <!-- Features - Bento Grid -->
+      <section class="py-16 px-margin-mobile md:px-margin-desktop bg-surface-container/30 relative" id="features">
+        <div class="absolute inset-0 bg-gradient-to-b from-surface-container-low/50 to-transparent pointer-events-none"></div>
+        <div class="max-w-container-max mx-auto relative z-10">
+          <div class="text-center mb-12 max-w-2xl mx-auto">
+            <h2 class="font-headline-lg text-headline-lg text-primary mb-3">Fitur Inti Naviance</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant">Teknologi mutakhir yang dirancang khusus untuk menyederhanakan pelacakan keuangan Anda tanpa membuang waktu berharga.</p>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Feature 1: OCR (Spans 2 columns on desktop) -->
+            <div class="md:col-span-2 bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/40 shadow-md flex flex-col md:flex-row gap-8 items-center group overflow-hidden relative">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-fixed to-transparent opacity-50"></div>
+              <div class="flex-1 space-y-4">
+                <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary shadow-sm">
+                  <span class="material-symbols-outlined">document_scanner</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-primary">Pencatatan Otomatis OCR</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                    Pindai struk belanja secara instan. AI kami akan secara otomatis mengekstrak nama merchant, total biaya, dan mengkategorikannya tanpa perlu input manual.
+                </p>
+              </div>
+              <div class="flex-1 w-full h-64 md:h-full bg-surface-variant rounded-2xl overflow-hidden relative border border-outline-variant/30 shadow-inner group/mockup">
+                <img alt="OCR receipt scanning process" class="w-full h-full object-cover transition-transform duration-700 group-hover/mockup:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvwPY69BAHTJ_tMZFav-RUvwfTmpB85kg6DAUuHSJ0pqfp_fhmVA_u8obQl4Za_N_ZOr0lAKgHbc7ZbPyZi93-J5xYWG9C-O6Hj4mzlyNJ7EVZtPJ4_ivSkiYfwzHOjMsjCGiuvDTmu9dLxPMWwd2WqRtNc95WdW6LI0ubO7LjoUclU3LD_JTWX0X6HaoNitLSSned1Eb5CqAofvjVrgNOp_q5orKz2w0HVc_Q5rGAZSZRGkLRDLQ6sC-RkTWpw6gQ4d-JyeBy8PU"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              </div>
+            </div>
+            
+            <!-- Feature 2: AI Forecasting -->
+            <div class="bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/40 shadow-md flex flex-col gap-6 relative justify-between">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary-container to-transparent opacity-50"></div>
+              <div>
+                <h3 class="font-headline-md text-headline-md text-primary mb-2">Prediksi Cerdas AI</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                    Algoritma machine learning kami memproyeksikan pengeluaran bulan depan Anda berdasarkan pola historis.
+                </p>
+              </div>
+              <div class="mt-4 w-full h-40 bg-surface-variant rounded-2xl overflow-hidden border border-outline-variant/30 shadow-inner">
+                <img alt="Academic Spending Analysis Dashboard" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEVhNPj25fZrTO3w8YEJK3aZUVWmJzZWsZiuEaUiLH8CoNN9dG77E9yzJzH1vWJYdKVcMvxOyurQkARbknN7xNQkjRZtrTlK76eM1Yy6D700YiQmZXaoAmN7aE6_gu5_4xS8isefo7FMYKakMwujexpcOzVzv5inzhyzsusnoEZnErv0J-YqaWZaHnX9od0r60tGbyfHJYwfhv_XOr9JXNs98qj3Rd9lheKzjp9E3evuWLgXitNaBlvCCnJWA2vJejYTU4otsTMwk"/>
+              </div>
+            </div>
+            
+            <!-- Feature 3: Adaptive Goals -->
+            <div class="md:col-span-3 bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/40 shadow-md flex flex-col md:flex-row items-center justify-between gap-8 bg-gradient-to-r from-surface-container-lowest via-surface-container-lowest to-surface-container-low relative">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-tertiary-fixed-dim to-transparent opacity-50"></div>
+              <div class="max-w-xl space-y-4">
+                <div class="inline-flex items-center gap-2 text-tertiary-container bg-tertiary-fixed-dim/30 px-3 py-1 rounded-full border border-tertiary-fixed-dim/40 shadow-sm">
+                  <span class="material-symbols-outlined text-sm">flag</span>
+                  <span class="font-label-sm text-label-sm font-bold">Single-Active-Goal</span>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-primary">Fokus Pada Satu Tujuan Adaptif</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">
+                    Jangan terpencar. Naviance mengarahkan fokus Anda pada satu target finansial pada satu waktu, menyesuaikan timeline secara dinamis berdasarkan pemasukan dan pengeluaran riil Anda.
+                </p>
+              </div>
+              <div class="w-full md:w-1/3 bg-surface-container-lowest border border-outline-variant/40 p-6 rounded-2xl shadow-lg relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-16 h-16 bg-tertiary-fixed-dim/10 rounded-full blur-xl"></div>
+                <div class="flex justify-between items-end mb-3">
+                  <span class="font-label-md text-label-md text-primary">Dana Darurat</span>
+                  <span class="font-label-sm text-label-sm text-secondary font-bold bg-secondary-fixed/50 px-2 py-0.5 rounded">75%</span>
+                </div>
+                <div class="w-full h-3 bg-surface-container rounded-full overflow-hidden shadow-inner">
+                  <div class="h-full bg-gradient-to-r from-tertiary-fixed-dim to-tertiary w-3/4 rounded-full shadow-sm"></div>
+                </div>
+                <p class="font-label-sm text-label-sm text-on-surface-variant mt-3 text-right flex items-center justify-end gap-1"><span class="material-symbols-outlined text-[14px]">check_circle</span> Tercapai dalam 2 bulan</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Decorative Divider -->
+      <div class="w-full flex justify-center py-4 relative z-20">
+        <div class="w-24 h-1 bg-gradient-to-r from-transparent via-outline-variant/50 to-transparent rounded-full"></div>
+      </div>
+      
+      <!-- Trust / Social Proof -->
+      <section class="py-12 px-margin-mobile md:px-margin-desktop bg-surface text-center relative z-10">
+        <div class="max-w-container-max mx-auto">
+          <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-6 flex items-center justify-center gap-4 before:h-px before:w-12 before:bg-outline-variant/50 after:h-px after:w-12 after:bg-outline-variant/50">Dipercaya oleh ribuan profesional muda</p>
+          <div class="flex flex-wrap justify-center items-center gap-10 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+            <div class="flex items-center gap-2 font-headline-md text-primary bg-surface-container-low px-4 py-2 rounded-lg border border-outline-variant/20 shadow-sm hover:shadow-md transition-shadow"><span class="material-symbols-outlined text-2xl text-secondary">corporate_fare</span> StartupHub</div>
+            <div class="flex items-center gap-2 font-headline-md text-primary bg-surface-container-low px-4 py-2 rounded-lg border border-outline-variant/20 shadow-sm hover:shadow-md transition-shadow"><span class="material-symbols-outlined text-2xl text-tertiary">domain</span> TechFinance</div>
+            <div class="flex items-center gap-2 font-headline-md text-primary bg-surface-container-low px-4 py-2 rounded-lg border border-outline-variant/20 shadow-sm hover:shadow-md transition-shadow"><span class="material-symbols-outlined text-2xl text-primary-fixed-variant">business</span> UnivInvest</div>
+            <div class="flex items-center gap-2 font-headline-md text-primary bg-surface-container-low px-4 py-2 rounded-lg border border-outline-variant/20 shadow-sm hover:shadow-md transition-shadow"><span class="material-symbols-outlined text-2xl text-error">storefront</span> GenZBank</div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Final CTA -->
+      <section class="py-16 px-margin-mobile md:px-margin-desktop relative z-10">
+        <div class="max-w-4xl mx-auto bg-primary rounded-[2.5rem] p-12 text-center shadow-2xl relative overflow-hidden border border-primary-container">
+          <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-secondary/30 via-primary to-primary opacity-90"></div>
+          <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-tertiary-fixed-dim/20 rounded-full blur-3xl"></div>
+          <div class="relative z-10">
+            <span class="material-symbols-outlined text-secondary text-5xl mb-4">rocket_launch</span>
+            <h2 class="font-display-lg text-display-lg text-on-primary mb-4">Siap Ambil Kendali Masa Depan Keuanganmu?</h2>
+            <p class="font-body-lg text-body-lg text-primary-fixed-dim mb-8 max-w-2xl mx-auto">
+                Bergabunglah dengan generasi baru yang melek finansial. Mulai lacak, rencanakan, dan wujudkan tujuan Anda bersama asisten AI pribadi Anda hari ini.
+            </p>
+            <div class="flex justify-center">
+              <button @click="router.push('/register')" class="bg-secondary-container text-on-secondary-container font-label-md text-label-md px-10 py-4 rounded-full hover:bg-secondary-fixed-dim transition-all active:scale-[0.98] shadow-lg shadow-secondary-container/30 flex items-center gap-2 border border-secondary">
+                  Buat Akun Gratis
+                  <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
 
-    </div>
+    <!-- Footer -->
+    <footer class="bg-primary dark:bg-surface-container-lowest w-full py-12 border-t border-primary-container relative z-10">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+        <div class="flex flex-col gap-4 md:col-span-1">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+            <span class="font-headline-md text-headline-md font-black text-on-primary dark:text-primary">Naviance</span>
+          </div>
+          <p class="font-body-md text-body-md text-on-primary/80 dark:text-on-surface-variant">Naviance: Navigate Your Finance. Empowering your financial future through intelligent tracking.</p>
+        </div>
+        <div class="flex flex-col gap-3 md:col-start-3">
+          <a class="font-body-md text-body-md text-on-primary/60 dark:text-on-surface-variant/70 hover:text-secondary-fixed-dim transition-colors active:translate-y-[-2px]" href="#">Privacy Policy</a>
+          <a class="font-body-md text-body-md text-on-primary/60 dark:text-on-surface-variant/70 hover:text-secondary-fixed-dim transition-colors active:translate-y-[-2px]" href="#">Terms of Service</a>
+          <a class="font-body-md text-body-md text-on-primary/60 dark:text-on-surface-variant/70 hover:text-secondary-fixed-dim transition-colors active:translate-y-[-2px]" href="#">Security</a>
+        </div>
+        <div class="flex flex-col gap-3">
+          <a class="font-body-md text-body-md text-on-primary/60 dark:text-on-surface-variant/70 hover:text-secondary-fixed-dim transition-colors active:translate-y-[-2px]" href="#">Cookie Settings</a>
+          <a class="font-body-md text-body-md text-on-primary/60 dark:text-on-surface-variant/70 hover:text-secondary-fixed-dim transition-colors active:translate-y-[-2px]" href="#">Help Center</a>
+        </div>
+      </div>
+    </footer>
+  </div>
 </template>
 
-
 <style scoped>
-/* ═══════════════════════════════════════════════
-   FONTS
-═══════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@500&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
-
-/* ═══════════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════════ */
-.landing-root {
-    /* Colors */
-    --clr-primary:              #0024c1;
-    --clr-primary-cta:          #0033ff;
-    --clr-secondary:            #545a91;
-    --clr-tertiary:             #4421a7;
-    --clr-surface:              #f9f9ff;
-    --clr-surface-low:          #f0f3ff;
-    --clr-surface-high:         #e2e8f8;
-    --clr-on-surface:           #151c27;
-    --clr-on-surface-muted:     #444657;
-    --clr-inverse-surface:      #2a313c;
-    --clr-outline-variant:      #c4c5da;
-    --clr-primary-fixed-dim:    #bcc3ff;
-    --clr-bg:                   #eaedf3;
-
-    /* Typography */
-    --font-display:   'Hanken Grotesk', sans-serif;
-    --font-body:      'Inter', sans-serif;
-    --font-mono:      'JetBrains Mono', monospace;
-
-    /* Radius */
-    --r-sm:     4px;
-    --r-md:     8px;
-    --r-lg:     16px;
-    --r-xl:     24px;
-    --r-2xl:    32px;
-    --r-card:   40px;
-    --r-full:   9999px;
-
-    /* Shadows */
-    --shadow-sm:   0 4px 20px rgba(0, 3, 61, 0.06);
-    --shadow-md:   0 8px 30px rgba(0, 3, 61, 0.10);
-    --shadow-lg:   0 16px 48px rgba(0, 3, 61, 0.14);
-    --shadow-ai:   0 0 24px rgba(68, 33, 167, 0.18);
-}
-
-/* ═══════════════════════════════════════════════
-   BASE
-═══════════════════════════════════════════════ */
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-button {
-    font-family: inherit;
-    cursor: pointer;
-    border: none;
-    background: none;
-}
-
-img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 .material-symbols-outlined {
-    font-family: 'Material Symbols Outlined';
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
-    display: inline-block;
-    white-space: nowrap;
-    word-wrap: normal;
-    direction: ltr;
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    vertical-align: middle;
-    user-select: none;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* ═══════════════════════════════════════════════
-   ROOT WRAPPER
-═══════════════════════════════════════════════ */
-.landing-root {
-    min-height: 100vh;
-    width: 100%;
-    overflow-x: hidden;
-    font-family: var(--font-body);
-    color: var(--clr-on-surface);
-    background-color: var(--clr-bg);
-    background-image:
-        radial-gradient(ellipse at 0% 0%,   rgba(0,  36, 193, 0.07) 0%, transparent 50%),
-        radial-gradient(ellipse at 100% 100%, rgba(68, 33, 167, 0.06) 0%, transparent 50%);
-}
-
-/* ═══════════════════════════════════════════════
-   NAVIGATION
-═══════════════════════════════════════════════ */
-.nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    width: 100%;
-    background: rgba(249, 249, 255, 0.82);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--clr-surface-high);
-}
-
-.nav-inner {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 16px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Brand */
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.logo-mark {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--r-md);
-    background: var(--clr-primary-cta);
-    color: #fff;
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 700;
-    display: grid;
-    place-items: center;
-    box-shadow: 0 4px 14px rgba(0, 51, 255, 0.28);
-    flex-shrink: 0;
-}
-
-.brand-name {
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--clr-on-surface);
-}
-
-/* Nav actions */
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.btn-ghost {
-    padding: 9px 22px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    color: var(--clr-on-surface-muted);
-    border-radius: var(--r-md);
-    transition: color 0.18s;
-}
-.btn-ghost:hover { color: var(--clr-primary); }
-
-.btn-cta {
-    padding: 9px 22px;
-    background: var(--clr-primary-cta);
-    color: #fff;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    border-radius: var(--r-md);
-    box-shadow: 0 4px 14px rgba(0, 51, 255, 0.28);
-    transition: background 0.18s, transform 0.1s, box-shadow 0.18s;
-}
-.btn-cta:hover  { background: var(--clr-primary); box-shadow: 0 6px 20px rgba(0, 36, 193, 0.35); }
-.btn-cta:active { transform: scale(0.95); }
-
-/* ═══════════════════════════════════════════════
-   MAIN WRAPPER
-═══════════════════════════════════════════════ */
-.main {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 72px 32px 120px;
-}
-
-/* ═══════════════════════════════════════════════
-   HERO SECTION
-═══════════════════════════════════════════════ */
-.hero {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 72px;
-    align-items: center;
-}
-
-/* ── Hero Left ── */
-.hero-left {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-}
-
-/* Badge */
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    width: fit-content;
-    border-radius: var(--r-full);
-    background: rgba(0, 36, 193, 0.09);
-    border: 1px solid rgba(0, 36, 193, 0.18);
-}
-
-.badge-icon {
-    font-size: 15px !important;
-    color: var(--clr-primary);
-}
-
-.badge-text {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    color: var(--clr-primary);
-}
-
-/* Heading */
-.hero-heading {
-    font-family: var(--font-display);
-    font-size: clamp(34px, 3.2vw, 48px);
-    font-weight: 700;
-    line-height: 1.14;
-    letter-spacing: -0.02em;
-    color: var(--clr-on-surface);
-    max-width: 520px;
-}
-
-.hero-heading em {
-    font-style: normal;
-    color: var(--clr-primary);
-}
-
-/* Subtext */
-.hero-sub {
-    font-family: var(--font-body);
-    font-size: 17px;
-    line-height: 1.65;
-    color: var(--clr-on-surface-muted);
-    max-width: 460px;
-}
-
-/* ── Snapshot Card ── */
-.snapshot {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    border-radius: var(--r-xl);
-    padding: 24px;
-    max-width: 420px;
-    box-shadow: var(--shadow-sm);
-}
-
-.snapshot-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.snapshot-label {
-    font-family: var(--font-display);
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--clr-on-surface);
-}
-
-.snapshot-more {
-    color: var(--clr-on-surface-muted);
-    font-size: 22px !important;
-    cursor: pointer;
-}
-
-.snapshot-row {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.snapshot-stat {
-    background: var(--clr-inverse-surface);
-    border-radius: var(--r-lg);
-    padding: 18px 20px;
-    min-width: 152px;
-    flex-shrink: 0;
-}
-
-.stat-period {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.07em;
-    color: rgba(255, 255, 255, 0.5);
-    margin-bottom: 10px;
-}
-
-.stat-amount-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-.stat-amount {
-    font-family: var(--font-mono);
-    font-size: 21px;
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    color: #fff;
-}
-
-.stat-trend {
-    font-size: 20px !important;
-    color: var(--clr-primary-fixed-dim);
-}
-
-.snapshot-note {
-    font-family: var(--font-body);
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--clr-on-surface-muted);
-    flex: 1;
-}
-
-/* ── Hero Right: Bento ── */
-.hero-right { position: relative; }
-
-.bento {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.bento-pair {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    align-items: start;
-}
-
-.bento-card {
-    border-radius: var(--r-card);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-}
-
-.bento-a { height: 300px; }
-.bento-b { height: 300px; margin-top: 28px; }
-.bento-c { height: 340px; margin-top: -36px; }
-
-/* ═══════════════════════════════════════════════
-   FEATURES TICKER
-═══════════════════════════════════════════════ */
-.features {
-    margin-top: 120px;
-    overflow: hidden;
-    position: relative;
-    padding: 32px 0;
-}
-
-/* Fade masks */
-.features::before,
-.features::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 120px;
-    z-index: 2;
-    pointer-events: none;
-}
-.features::before {
-    left: 0;
-    background: linear-gradient(to right, var(--clr-bg), transparent);
-}
-.features::after {
-    right: 0;
-    background: linear-gradient(to left, var(--clr-bg), transparent);
-}
-
-.ticker-track {
-    display: flex;
-    gap: 20px;
-    width: max-content;
-    animation: ticker 44s linear infinite;
-}
-.ticker-track:hover { animation-play-state: paused; }
-
-@keyframes ticker {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(calc(-1 * (320px + 20px) * 5)); }
-}
-
-/* ── Feature Card ── */
-.feature-card {
-    width: 320px;
-    flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.38);
-    border-radius: var(--r-xl);
-    padding: 24px;
-    box-shadow: var(--shadow-sm);
-    transition: background 0.22s;
-}
-.feature-card:hover { background: rgba(255, 255, 255, 0.95); }
-
-.feature-card--accent {
-    border-color: rgba(0, 36, 193, 0.15);
-    box-shadow: var(--shadow-ai);
-}
-
-.feature-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--r-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 18px;
-    transition: background 0.22s, color 0.22s;
-}
-
-.feature-icon--primary  { background: rgba(0,  36, 193, 0.10); color: var(--clr-primary); }
-.feature-icon--secondary{ background: rgba(84, 90, 145, 0.10); color: var(--clr-secondary); }
-.feature-icon--tertiary { background: rgba(68, 33, 167, 0.10); color: var(--clr-tertiary); }
-
-.feature-card:hover .feature-icon--primary  { background: var(--clr-primary);   color: #fff; }
-.feature-card:hover .feature-icon--secondary{ background: var(--clr-secondary); color: #fff; }
-.feature-card:hover .feature-icon--tertiary { background: var(--clr-tertiary);  color: #fff; }
-
-.feature-title {
-    font-family: var(--font-display);
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1.3;
-    color: var(--clr-on-surface);
-    margin-bottom: 10px;
-}
-
-.feature-body {
-    font-family: var(--font-body);
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--clr-on-surface-muted);
-}
-
-/* ═══════════════════════════════════════════════
-   FLOATING ACTION BUTTON
-═══════════════════════════════════════════════ */
-.fab {
-    position: fixed;
-    bottom: 32px;
-    right: 32px;
-    z-index: 200;
-    width: 56px;
-    height: 56px;
-    border-radius: var(--r-full);
-    background: var(--clr-tertiary);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 28px rgba(68, 33, 167, 0.38);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.fab:hover  { transform: scale(1.08); box-shadow: 0 12px 36px rgba(68, 33, 167, 0.48); }
-.fab:active { transform: scale(0.93); }
-
-/* ═══════════════════════════════════════════════
-   CHAT PANEL
-═══════════════════════════════════════════════ */
-.chat-panel {
-    position: fixed;
-    bottom: 104px;
-    right: 32px;
-    z-index: 200;
-    width: 324px;
-    height: 390px;
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--r-xl);
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    box-shadow: 0 20px 60px rgba(0, 3, 61, 0.16);
-}
-
-.chat-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    background: var(--clr-tertiary);
-    flex-shrink: 0;
-}
-
-.chat-header-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.chat-bot-icon {
-    font-size: 18px !important;
-    color: #fff;
-}
-
-.chat-header-title {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    color: #fff;
-}
-
-.chat-close {
-    color: rgba(255, 255, 255, 0.72);
-    display: flex;
-    align-items: center;
-    transition: color 0.15s;
-}
-.chat-close:hover { color: #fff; }
-.chat-close .material-symbols-outlined { font-size: 20px !important; }
-
-.chat-messages {
-    flex: 1;
-    padding: 16px;
-    overflow-y: auto;
-}
-
-.chat-bubble {
-    padding: 12px 14px;
-    font-family: var(--font-body);
-    font-size: 14px;
-    line-height: 1.55;
-    max-width: 90%;
-    border-radius: 14px;
-}
-
-.chat-bubble--ai {
-    background: var(--clr-surface-low);
-    color: var(--clr-on-surface);
-    border-top-left-radius: 4px;
-}
-
-.chat-footer {
-    padding: 12px 16px;
-    border-top: 1px solid var(--clr-surface-high);
-    flex-shrink: 0;
-}
-
-.chat-input-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #fff;
-    border: 1px solid var(--clr-outline-variant);
-    border-radius: var(--r-full);
-    padding: 8px 8px 8px 16px;
-}
-
-.chat-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-family: var(--font-body);
-    font-size: 14px;
-    color: var(--clr-on-surface);
-}
-.chat-input::placeholder { color: var(--clr-on-surface-muted); }
-
-.chat-send {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--r-full);
-    background: var(--clr-primary-cta);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.18s, transform 0.1s;
-}
-.chat-send:hover  { background: var(--clr-primary); }
-.chat-send:active { transform: scale(0.9); }
-.chat-send .material-symbols-outlined { font-size: 17px !important; }
-
-/* ═══════════════════════════════════════════════
-   TRANSITIONS
-═══════════════════════════════════════════════ */
-.chat-enter-active,
-.chat-leave-active {
-    transition: opacity 0.24s ease, transform 0.24s ease;
-}
-.chat-enter-from,
-.chat-leave-to {
-    opacity: 0;
-    transform: translateY(14px) scale(0.97);
-}
-
-/* ═══════════════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════════════ */
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50%       { transform: translateY(-9px); }
-}
-.animate-float { animation: float 6s ease-in-out infinite; }
-
-/* ═══════════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════════ */
-@media (max-width: 1024px) {
-    .hero {
-        grid-template-columns: 1fr;
-        gap: 52px;
-    }
-    .hero-heading { font-size: 36px; max-width: 100%; }
-    .hero-sub     { max-width: 100%; }
-    .snapshot     { max-width: 100%; }
-    .bento-a,
-    .bento-b      { height: 240px; }
-    .bento-c      { height: 280px; }
-    .features     { margin-top: 80px; }
-}
-
-@media (max-width: 640px) {
-    .main         { padding: 48px 20px 100px; }
-    .nav-inner    { padding: 14px 20px; }
-    .hero-heading { font-size: 28px; }
-    .bento-pair   { grid-template-columns: 1fr; }
-    .bento-b      { margin-top: 0; }
-    .bento-a,
-    .bento-b,
-    .bento-c      { height: 220px; margin-top: 0; }
-    .feature-card { width: 272px; }
-    .snapshot-row { flex-direction: column; align-items: stretch; }
-    .snapshot-stat{ min-width: unset; }
-    .chat-panel   { width: calc(100vw - 32px); right: 16px; bottom: 96px; }
-    .fab          { right: 20px; bottom: 20px; }
+/* Custom Background Pattern */
+.bg-pattern {
+    background-image: radial-gradient(#c5c6cd 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: -12px -12px;
+    opacity: 0.15;
 }
 </style>
