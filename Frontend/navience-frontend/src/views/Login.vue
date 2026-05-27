@@ -6,76 +6,541 @@ import { useAuthStore } from '@/stores/auth'
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const isSubmitting = ref(false)
 
 const authStore = useAuthStore()
 const router = useRouter()
 
 const handleLogin = async () => {
   if (!email.value || !password.value) {
-    authStore.authError = "Username dan password wajib diisi"
+    authStore.authError = 'Email dan kata sandi wajib diisi'
     return
   }
+
+  isSubmitting.value = true
   try {
-    await authStore.login(
-      email.value,
-      password.value
-    )
-
+    await authStore.login(email.value, password.value)
     router.push('/')
-  } catch (error: any) {
-    return
+  } catch {
+    // Error handled by auth store
+  } finally {
+    isSubmitting.value = false
   }
 }
 
-function togglePasswordVisibility() {
-  showPassword.value = !showPassword.value
+async function handleGoogleLogin() {
+  authStore.authError = 'Login dengan Google belum tersedia saat ini.'
 }
-
 </script>
 
 <template>
-  <div>
-    <h1>Login</h1>
-    <form @submit.prevent="handleLogin">
-      <input
-        v-model="email"
-        type="email"
-        placeholder="Email"
-      />
+  <div class="auth-page">
+    <!-- Logo / Branding -->
+    <div class="auth-brand">
+      <span class="material-symbols-outlined brand-icon">account_balance</span>
+      <p class="brand-text">Navigate Your Finance</p>
+    </div>
 
-      <input
-        v-model="password"
-        :type="showPassword ? 'text' : 'password'"
-        placeholder="Password"
-      />
-      <button
-        v-if="password"
-        type="button"
-        @click="togglePasswordVisibility"
-        class="password-toggle"
-        tabindex="-1"
-      >*</button>
-      <button type="submit">
-        Login
-      </button>
-      <p v-if="authStore.authError" class="error-message">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    <!-- Auth Card -->
+    <div class="auth-card">
+      <!-- Header -->
+      <div class="auth-header">
+        <h2 class="auth-title">Selamat Datang</h2>
+        <p class="auth-subtitle">Masuk untuk melanjutkan ke dasbor Anda.</p>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="tab-switcher">
+        <button id="tab-login" class="tab-btn active">Masuk</button>
+        <button id="tab-register" class="tab-btn" @click="router.push('/register')">Daftar</button>
+      </div>
+
+      <!-- Error Alert -->
+      <Transition name="alert">
+        <div v-if="authStore.authError" class="error-alert">
+          <span class="material-symbols-outlined error-icon">error</span>
+          <span>{{ authStore.authError }}</span>
+        </div>
+      </Transition>
+
+      <!-- Login Form -->
+      <form class="auth-form" @submit.prevent="handleLogin">
+        <!-- Email -->
+        <div class="field-group">
+          <label class="field-label" for="login-email">Email</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">mail</span>
+            <input
+              id="login-email"
+              v-model="email"
+              type="email"
+              class="auth-input"
+              placeholder="nama@email.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="field-group">
+          <div class="label-row">
+            <label class="field-label" for="login-password">Kata Sandi</label>
+            <a href="#" class="forgot-link">Lupa kata sandi?</a>
+          </div>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">lock</span>
+            <input
+              id="login-password"
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              class="auth-input has-toggle"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              @click="showPassword = !showPassword"
+              tabindex="-1"
+            >
+              <span class="material-symbols-outlined" :class="{ 'icon-active': showPassword }">
+                {{ showPassword ? 'visibility' : 'visibility_off' }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="submit-btn" :disabled="isSubmitting">
+          <span v-if="isSubmitting" class="spinner"></span>
+          <span v-else>Masuk</span>
+          <span v-if="!isSubmitting" class="material-symbols-outlined submit-arrow">arrow_forward</span>
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">Atau lanjutkan dengan</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Google Login -->
+      <button type="button" class="google-btn" @click="handleGoogleLogin">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
+          <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+          <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+          <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+          <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
         </svg>
-        {{ authStore.authError }}
-      </p>
-    </form>
+        Google
+      </button>
+    </div>
   </div>
 </template>
+
+<style scoped>
+/* ===== PAGE LAYOUT ===== */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fbf8fa;
+  color: #1b1b1d;
+  padding: 16px;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .auth-page {
+    padding: 40px;
+  }
+}
+
+/* ===== BRANDING ===== */
+.auth-brand {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 30;
+}
+
+.brand-icon {
+  font-size: 36px;
+  color: #fea619;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.brand-text {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #091426;
+  letter-spacing: 0.02em;
+}
+
+/* ===== AUTH CARD ===== */
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(30, 41, 59, 0.05);
+  border: 1px solid rgba(197, 198, 205, 0.3);
+  padding: 32px;
+}
+
+@media (min-width: 1024px) {
+  .auth-card {
+    padding: 40px;
+  }
+}
+
+/* ===== HEADER ===== */
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  color: #091426;
+  margin: 0 0 8px 0;
+}
+
+@media (min-width: 1024px) {
+  .auth-title {
+    font-size: 32px;
+    line-height: 40px;
+    letter-spacing: -0.01em;
+  }
+}
+
+.auth-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: #45474c;
+  margin: 0;
+}
+
+/* ===== TAB SWITCHER ===== */
+.tab-switcher {
+  display: flex;
+  background: #eae7e9;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 32px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: #45474c;
+}
+
+.tab-btn:hover {
+  color: #091426;
+}
+
+.tab-btn.active {
+  background: #ffffff;
+  color: #091426;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== ERROR ALERT ===== */
+.error-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  background: #ffdad6;
+  color: #93000a;
+  border: 1px solid rgba(186, 26, 26, 0.15);
+}
+
+.error-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* ===== FORM ===== */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  color: #1b1b1d;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-link {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: #091426;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* ===== INPUT ===== */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: rgba(69, 71, 76, 0.7);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  background: #fbf8fa;
+  border: 1px solid #c5c6cd;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1b1b1d;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-input.has-toggle {
+  padding-right: 44px;
+}
+
+.auth-input::placeholder {
+  color: rgba(69, 71, 76, 0.5);
+}
+
+.auth-input:focus {
+  border-color: #091426;
+  box-shadow: 0 0 0 2px rgba(254, 166, 25, 0.4);
+}
+
+/* ===== PASSWORD TOGGLE ===== */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(69, 71, 76, 0.7);
+  transition: color 0.15s;
+}
+
+.toggle-password:hover {
+  color: #091426;
+}
+
+.toggle-password .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.toggle-password .icon-active {
+  color: #091426;
+}
+
+/* ===== SUBMIT BUTTON ===== */
+.submit-btn {
+  width: 100%;
+  padding: 14px 0;
+  margin-top: 8px;
+  background: #fea619;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  color: #091426;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: rgba(254, 166, 25, 0.9);
+  box-shadow: 0 4px 12px rgba(254, 166, 25, 0.3);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submit-arrow {
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) .submit-arrow {
+  transform: translateX(4px);
+}
+
+/* ===== SPINNER ===== */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(9, 20, 38, 0.2);
+  border-top-color: #091426;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== DIVIDER ===== */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 32px 0 24px;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(197, 198, 205, 0.3);
+}
+
+.divider-text {
+  margin: 0 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: rgba(69, 71, 76, 0.7);
+  background: #ffffff;
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+/* ===== GOOGLE BUTTON ===== */
+.google-btn {
+  width: 100%;
+  padding: 12px 0;
+  background: #fbf8fa;
+  border: 1px solid #c5c6cd;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  color: #1b1b1d;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.google-btn:hover {
+  background: #f5f3f4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.google-btn:active {
+  transform: scale(0.98);
+}
+
+/* ===== TRANSITIONS ===== */
+.alert-enter-active {
+  animation: fadeInUp 0.25s ease-out;
+}
+
+.alert-leave-active {
+  animation: fadeOutUp 0.15s ease-in;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOutUp {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-5px); }
+}
+
+/* ===== MATERIAL SYMBOLS ===== */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+</style>

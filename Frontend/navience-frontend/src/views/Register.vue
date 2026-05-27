@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const email = ref('')
 const password = ref('')
@@ -9,50 +9,634 @@ const confirmPassword = ref('')
 const fullName = ref('')
 
 const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+const isSubmitting = ref(false)
+const registerSuccess = ref(false)
+
 const auth = useAuthStore()
 const router = useRouter()
 
 const handleRegist = async () => {
-  if (!email.value || !password.value || !confirmPassword.value || !fullName.value) {
-    auth.authError = "Lengkapi data untuk melakukan mendaftar"
+  if (!fullName.value || !email.value || !password.value || !confirmPassword.value) {
+    auth.authError = 'Lengkapi semua data untuk mendaftar'
+    return
+  }
+
+  if (password.value.length < 8) {
+    auth.authError = 'Kata sandi minimal 8 karakter'
     return
   }
 
   if (password.value !== confirmPassword.value) {
-    auth.authError = "Password tidak sama, mohon periksa ulang"
+    auth.authError = 'Kata sandi tidak cocok, mohon periksa ulang'
     return
   }
 
+  isSubmitting.value = true
   try {
-    await auth.register(
-      email.value,
-      password.value,
-      { nama_lengkap: fullName.value }
-    )
-    router.push('/login')
-  } catch (error) {
-    return
+    await auth.register(email.value, password.value, {
+      nama_lengkap: fullName.value
+    })
+    registerSuccess.value = true
+    auth.authError = null
+    // Clear form
+    fullName.value = ''
+    email.value = ''
+    password.value = ''
+    confirmPassword.value = ''
+  } catch {
+    // Error handled by auth store
+  } finally {
+    isSubmitting.value = false
   }
 }
 
-function togglePasswordVisibility() {
-  showPassword.value = !showPassword.value
+async function handleGoogleLogin() {
+  auth.authError = 'Login dengan Google belum tersedia saat ini.'
 }
-
 </script>
 
 <template>
-    <div class="container">
-        <div class="header">
-            <h1>Register</h1>
-            <form @submit.prevent="handleRegist" method="post">
-                <input type="email" v-model="email" placeholder="email">
-                <input type="text" v-model="fullName" placeholder="nama lengkap">
-                <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="password">
-                <input :type="showPassword ? 'text' : 'password'" v-model="confirmPassword" placeholder="confirm password">
-                <button type="submit">Daftar</button>
-            </form>
-            <p class="error-message" v-if="auth.authError">{{ auth.authError }}</p>
-        </div>
+  <div class="auth-page">
+    <!-- Logo / Branding -->
+    <div class="auth-brand">
+      <span class="material-symbols-outlined brand-icon">account_balance</span>
+      <p class="brand-text">Navigate Your Finance</p>
     </div>
+
+    <!-- Auth Card -->
+    <div class="auth-card">
+      <!-- Header -->
+      <div class="auth-header">
+        <h2 class="auth-title">Mulai Perjalanan Anda</h2>
+        <p class="auth-subtitle">Buat akun Naviance untuk mulai mengelola keuangan.</p>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="tab-switcher">
+        <button id="tab-login" class="tab-btn" @click="router.push('/login')">Masuk</button>
+        <button id="tab-register" class="tab-btn active">Daftar</button>
+      </div>
+
+      <!-- Error Alert -->
+      <Transition name="alert">
+        <div v-if="auth.authError" class="error-alert">
+          <span class="material-symbols-outlined error-icon">error</span>
+          <span>{{ auth.authError }}</span>
+        </div>
+      </Transition>
+
+      <!-- Success Alert -->
+      <Transition name="alert">
+        <div v-if="registerSuccess" class="success-alert">
+          <span class="material-symbols-outlined success-icon">check_circle</span>
+          <span>Pendaftaran berhasil! Silakan <a href="#" class="success-link" @click.prevent="router.push('/login')">masuk</a> dengan akun baru Anda.</span>
+        </div>
+      </Transition>
+
+      <!-- Register Form -->
+      <form class="auth-form" @submit.prevent="handleRegist">
+        <!-- Full Name -->
+        <div class="field-group">
+          <label class="field-label" for="reg-name">Nama Lengkap</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">person</span>
+            <input
+              id="reg-name"
+              v-model="fullName"
+              type="text"
+              class="auth-input"
+              placeholder="Nama Lengkap Anda"
+              required
+              autocomplete="name"
+            />
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="field-group">
+          <label class="field-label" for="reg-email">Alamat Email</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">mail</span>
+            <input
+              id="reg-email"
+              v-model="email"
+              type="email"
+              class="auth-input"
+              placeholder="nama@email.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="field-group">
+          <label class="field-label" for="reg-password">Kata Sandi</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">lock</span>
+            <input
+              id="reg-password"
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              class="auth-input has-toggle"
+              placeholder="Minimal 8 karakter"
+              required
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              @click="showPassword = !showPassword"
+              tabindex="-1"
+            >
+              <span class="material-symbols-outlined" :class="{ 'icon-active': showPassword }">
+                {{ showPassword ? 'visibility' : 'visibility_off' }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="field-group">
+          <label class="field-label" for="reg-password-confirm">Konfirmasi Kata Sandi</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">lock_reset</span>
+            <input
+              id="reg-password-confirm"
+              v-model="confirmPassword"
+              :type="showConfirmPassword ? 'text' : 'password'"
+              class="auth-input has-toggle"
+              placeholder="Ulangi kata sandi"
+              required
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              @click="showConfirmPassword = !showConfirmPassword"
+              tabindex="-1"
+            >
+              <span class="material-symbols-outlined" :class="{ 'icon-active': showConfirmPassword }">
+                {{ showConfirmPassword ? 'visibility' : 'visibility_off' }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="submit-btn" :disabled="isSubmitting">
+          <span v-if="isSubmitting" class="spinner"></span>
+          <span v-else>Daftar Sekarang</span>
+          <span v-if="!isSubmitting" class="material-symbols-outlined submit-arrow">person_add</span>
+        </button>
+
+        <p class="terms-text">
+          Dengan mendaftar, Anda menyetujui
+          <a href="#" class="terms-link">Syarat &amp; Ketentuan</a> kami.
+        </p>
+      </form>
+
+      <!-- Divider -->
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">Atau lanjutkan dengan</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Google Login -->
+      <button type="button" class="google-btn" @click="handleGoogleLogin">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
+          <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+          <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+          <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+          <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+        </svg>
+        Google
+      </button>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+/* ===== PAGE LAYOUT ===== */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fbf8fa;
+  color: #1b1b1d;
+  padding: 16px;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .auth-page {
+    padding: 40px;
+  }
+}
+
+/* ===== BRANDING ===== */
+.auth-brand {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 30;
+}
+
+.brand-icon {
+  font-size: 36px;
+  color: #fea619;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.brand-text {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #091426;
+  letter-spacing: 0.02em;
+}
+
+/* ===== AUTH CARD ===== */
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(30, 41, 59, 0.05);
+  border: 1px solid rgba(197, 198, 205, 0.3);
+  padding: 32px;
+}
+
+@media (min-width: 1024px) {
+  .auth-card {
+    padding: 40px;
+  }
+}
+
+/* ===== HEADER ===== */
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  color: #091426;
+  margin: 0 0 8px 0;
+}
+
+@media (min-width: 1024px) {
+  .auth-title {
+    font-size: 32px;
+    line-height: 40px;
+    letter-spacing: -0.01em;
+  }
+}
+
+.auth-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: #45474c;
+  margin: 0;
+}
+
+/* ===== TAB SWITCHER ===== */
+.tab-switcher {
+  display: flex;
+  background: #eae7e9;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 32px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: #45474c;
+}
+
+.tab-btn:hover {
+  color: #091426;
+}
+
+.tab-btn.active {
+  background: #ffffff;
+  color: #091426;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== ERROR / SUCCESS ALERTS ===== */
+.error-alert,
+.success-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+}
+
+.error-alert {
+  background: #ffdad6;
+  color: #93000a;
+  border: 1px solid rgba(186, 26, 26, 0.15);
+}
+
+.success-alert {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.error-icon,
+.success-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.success-link {
+  color: #065f46;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* ===== FORM ===== */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  color: #1b1b1d;
+}
+
+/* ===== INPUT ===== */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: rgba(69, 71, 76, 0.7);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  background: #fbf8fa;
+  border: 1px solid #c5c6cd;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1b1b1d;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-input.has-toggle {
+  padding-right: 44px;
+}
+
+.auth-input::placeholder {
+  color: rgba(69, 71, 76, 0.5);
+}
+
+.auth-input:focus {
+  border-color: #091426;
+  box-shadow: 0 0 0 2px rgba(254, 166, 25, 0.4);
+}
+
+/* ===== PASSWORD TOGGLE ===== */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(69, 71, 76, 0.7);
+  transition: color 0.15s;
+}
+
+.toggle-password:hover {
+  color: #091426;
+}
+
+.toggle-password .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.toggle-password .icon-active {
+  color: #091426;
+}
+
+/* ===== SUBMIT BUTTON ===== */
+.submit-btn {
+  width: 100%;
+  padding: 14px 0;
+  margin-top: 8px;
+  background: #fea619;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  color: #091426;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: rgba(254, 166, 25, 0.9);
+  box-shadow: 0 4px 12px rgba(254, 166, 25, 0.3);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submit-arrow {
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) .submit-arrow {
+  transform: translateX(4px);
+}
+
+/* ===== SPINNER ===== */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(9, 20, 38, 0.2);
+  border-top-color: #091426;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== TERMS TEXT ===== */
+.terms-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: #45474c;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.terms-link {
+  color: #091426;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
+/* ===== DIVIDER ===== */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 32px 0 24px;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(197, 198, 205, 0.3);
+}
+
+.divider-text {
+  margin: 0 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: rgba(69, 71, 76, 0.7);
+  background: #ffffff;
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+/* ===== GOOGLE BUTTON ===== */
+.google-btn {
+  width: 100%;
+  padding: 12px 0;
+  background: #fbf8fa;
+  border: 1px solid #c5c6cd;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  color: #1b1b1d;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.google-btn:hover {
+  background: #f5f3f4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.google-btn:active {
+  transform: scale(0.98);
+}
+
+/* ===== TRANSITIONS ===== */
+.alert-enter-active {
+  animation: fadeInUp 0.25s ease-out;
+}
+
+.alert-leave-active {
+  animation: fadeOutUp 0.15s ease-in;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOutUp {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-5px); }
+}
+
+/* ===== MATERIAL SYMBOLS ===== */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+</style>
