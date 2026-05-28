@@ -20,6 +20,8 @@ export const useTransaksiStore = defineStore('transaksi', () => {
     const isLoading = ref(false)
     const storeError = ref<string | null>(null);
     const searchQuery = ref('');
+    const filterCategory = ref('');
+    const filterTimeRange = ref('');
     const sortNominal = ref<'asc' | 'desc' | ''>('');
 
     const hasItems = computed(() => items.value.length > 0)
@@ -41,11 +43,31 @@ export const useTransaksiStore = defineStore('transaksi', () => {
 
     const filteredItems = computed(() => {
         const keyword = searchQuery.value.trim().toLowerCase();
-        if (!keyword) {
-            return items.value;
+        let list = items.value;
+
+        if (filterCategory.value) {
+            list = list.filter(item => item.id_kategori === filterCategory.value);
         }
 
-        return items.value.filter(item => {
+        if (filterTimeRange.value) {
+            const now = new Date();
+            if (filterTimeRange.value === '7d') {
+                const limit = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                list = list.filter(item => new Date(item.tanggal_transaksi) >= limit);
+            } else if (filterTimeRange.value === '30d') {
+                const limit = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                list = list.filter(item => new Date(item.tanggal_transaksi) >= limit);
+            } else if (filterTimeRange.value === 'this_month') {
+                const ym = now.toISOString().slice(0, 7);
+                list = list.filter(item => item.tanggal_transaksi.startsWith(ym));
+            }
+        }
+
+        if (!keyword) {
+            return list;
+        }
+
+        return list.filter(item => {
             const nama = item.nama_transaksi?.toLowerCase() ?? '';
             const deskripsi = item.deskripsi?.toLowerCase() ?? '';
             return nama.includes(keyword) || deskripsi.includes(keyword);
@@ -385,6 +407,8 @@ export const useTransaksiStore = defineStore('transaksi', () => {
         isLoading,
         storeError,
         searchQuery,
+        filterCategory,
+        filterTimeRange,
         sortNominal,
         hasItems,
         totalNominal,

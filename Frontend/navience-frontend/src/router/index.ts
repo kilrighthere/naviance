@@ -6,7 +6,7 @@ import Login from '@/views/Login.vue'
 import Register from '@/views/Register.vue'
 import Dashboard from '@/views/Dashboard.vue'
 import Profile from '@/views/Profile.vue'
-
+import Transaksi from '@/views/Transaksi.vue'
 
 const routes = [
   {
@@ -30,6 +30,13 @@ const routes = [
   {
     path: '/dashboard/:userId',
     component: Dashboard,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/transaksi/:userId',
+    component: Transaksi,
     meta: {
       requiresAuth: true
     }
