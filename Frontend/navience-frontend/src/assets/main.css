@@ -186,3 +186,59 @@ body {
     margin-left: 0;
   }
 }
+
+/* =============================================
+   Chart: SVG Line Chart Interactive Tooltip
+   ============================================= */
+.chart-container {
+  position: relative;
+}
+
+.chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out, transform 0.1s ease-out;
+  z-index: 20;
+  transform: translate(-50%, -100%);
+}
+
+.chart-guide-line {
+  position: absolute;
+  width: 1px;
+  height: calc(100% - 40px);
+  background-color: rgba(30, 41, 59, 0.2);
+  top: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 10;
+}
+
+.chart-point {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: white;
+  border: 2px solid;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 15;
+  transform: translate(-50%, -50%);
+}
+
+/* =============================================
+   Profile Dropdown
+   ============================================= */
+.profile-dropdown-enter-active,
+.profile-dropdown-leave-active {
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.profile-dropdown-enter-from,
+.profile-dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.95);
+}

@@ -67,7 +67,7 @@ defineExpose({ isMinimized });
     <!-- Header (Expanded) -->
     <div class="sidebar-header px-4 py-4 mb-4">
       <h1 class="text-headline-md font-headline-md font-extrabold text-primary">Naviance</h1>
-      <p class="font-label-sm text-label-sm text-on-surface-variant">Navigate Your Finance</p>
+      <p class="font-label-sm text-label-sm text-primary">Navigate Your Finance</p>
     </div>
 
     <!-- Logo (Minimized) -->
@@ -82,14 +82,15 @@ defineExpose({ isMinimized });
           :to="item.to()"
           class="sidebar-link flex items-center gap-unit rounded-lg px-4 py-3 mx-1 transition-all duration-150"
           :class="isActive(item.to())
-            ? 'bg-primary-container text-on-primary-container scale-95'
+            ? 'bg-primary-container scale-95 text-white'
             : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high'"
         >
           <span
             class="material-symbols-outlined"
+            :class="isActive(item.to()) ? 'text-white' : ''"
             :style="isActive(item.to()) ? 'font-variation-settings: \'FILL\' 1;' : ''"
           >{{ item.icon }}</span>
-          <span class="sidebar-label font-label-md text-label-md">{{ item.label }}</span>
+          <span class="sidebar-label font-label-md text-label-md" :class="isActive(item.to()) ? 'text-white' : ''">{{ item.label }}</span>
         </RouterLink>
       </li>
     </ul>

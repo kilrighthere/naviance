@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
 import { useTransaksiStore } from '@/stores/transaksi';
 import { useAnggaranStore } from '@/stores/anggaran';
-import ApexChart from 'vue3-apexcharts';
-import type { ApexOptions } from 'apexcharts';
 import Sidebar from '@/components/sidebar.vue';
 import ChatBot from '@/components/chatBot.vue';
+import FormTransaksi from '@/components/formTransaksi.vue';
 
 const transaksiStore = useTransaksiStore();
 const authStore = useAuthStore();
@@ -15,9 +14,10 @@ const anggaranStore = useAnggaranStore();
 
 const userID = computed(() => authStore.user?.id ?? '');
 const userName = computed(() => authStore.user?.user_metadata?.nama_lengkap ?? 'User');
+const userEmail = computed(() => authStore.user?.email ?? '');
 
 const { transaksiByJenis, ringkasan6BulanApex } = storeToRefs(transaksiStore);
-const { items: anggaranItems, anggaranTerpakai } = storeToRefs(anggaranStore);
+const { items: anggaranItems } = storeToRefs(anggaranStore);
 
 const transaksiPemasukan = computed(() => transaksiByJenis.value?.['pemasukan'] ?? []);
 const transaksiPengeluaran = computed(() => transaksiByJenis.value?.['pengeluaran'] ?? []);
@@ -46,76 +46,148 @@ const totalSisaAnggaran = computed(() => {
   return totalAnggaran - totalTerpakai;
 });
 
-// Chart configuration: bar chart matching the reference design
-const ringkasanChartOptions = computed<ApexOptions>(() => ({
-  chart: {
-    type: 'bar',
-    toolbar: { show: false },
-    fontFamily: 'Inter, sans-serif',
-    background: 'transparent',
-  },
-  plotOptions: {
-    bar: {
-      columnWidth: '35%',
-      borderRadius: 4,
-      borderRadiusApplication: 'end',
-    }
-  },
-  dataLabels: { enabled: false },
-  stroke: { show: false },
-  xaxis: {
-    categories: ringkasan6BulanApex.value.categories,
-    labels: {
-      style: {
-        colors: '#75777d',
-        fontFamily: 'Inter',
-        fontSize: '12px',
-        fontWeight: 500,
-      }
-    },
-    axisBorder: { show: false },
-    axisTicks: { show: false },
-  },
-  yaxis: {
-    show: false,
-    min: 0,
-    labels: {
-      formatter: (value: number) => value.toLocaleString('id-ID')
-    }
-  },
-  grid: {
-    borderColor: '#c5c6cd20',
-    strokeDashArray: 0,
-    xaxis: { lines: { show: false } },
-    yaxis: { lines: { show: true } },
-    padding: { left: 8, right: 8 },
-  },
-  tooltip: {
-    y: {
-      formatter: (value: number) => 'Rp ' + value.toLocaleString('id-ID')
-    }
-  },
-  legend: {
-    position: 'bottom',
-    fontFamily: 'Inter',
-    fontSize: '12px',
-    fontWeight: 500,
-    labels: { colors: '#45474c' },
-    markers: {
-      size: 6,
-      shape: 'circle',
-    },
-    itemMargin: { horizontal: 16 },
-  },
-  colors: ['#00a472', '#ba1a1a'],
-  fill: {
-    opacity: 1,
-  },
-}));
+// ─── SVG Line Chart Data ───────────────────────────
+const chartPeriod = ref('6bulan');
 
-const ringkasanSeries = computed(() => ringkasan6BulanApex.value.series);
+// Build chart data from store
+const chartData = computed(() => {
+  const apex = ringkasan6BulanApex.value;
+  const categories = apex.categories;
+  const incomeData = apex.series[0]?.data ?? [];
+  const expenseData = apex.series[1]?.data ?? [];
 
-// Recent transactions (latest 5)
+  // Find max value for Y-axis scaling
+  const allValues = [...incomeData, ...expenseData];
+  const maxVal = Math.max(...allValues, 1);
+
+  const viewBoxWidth = 600;
+  const viewBoxHeight = 160;
+  const pointCount = categories.length || 1;
+
+  return categories.map((month: string, i: number) => {
+    const x = pointCount > 1 ? (i / (pointCount - 1)) * viewBoxWidth : viewBoxWidth / 2;
+    const yInc = viewBoxHeight - (incomeData[i] / maxVal) * (viewBoxHeight - 10);
+    const yExp = viewBoxHeight - (expenseData[i] / maxVal) * (viewBoxHeight - 10);
+    return {
+      month,
+      income: incomeData[i],
+      expense: expenseData[i],
+      x,
+      yInc,
+      yExp,
+    };
+  });
+});
+
+const incomePath = computed(() => {
+  if (chartData.value.length === 0) return '';
+  return chartData.value.map((d, i) => `${i === 0 ? 'M' : 'L'} ${d.x},${d.yInc}`).join(' ');
+});
+
+const incomeAreaPath = computed(() => {
+  if (chartData.value.length === 0) return '';
+  const linePart = chartData.value.map((d, i) => `${i === 0 ? 'M' : 'L'} ${d.x},${d.yInc}`).join(' ');
+  const last = chartData.value[chartData.value.length - 1];
+  const first = chartData.value[0];
+  return `${linePart} L ${last.x},160 L ${first.x},160 Z`;
+});
+
+const expensePath = computed(() => {
+  if (chartData.value.length === 0) return '';
+  return chartData.value.map((d, i) => `${i === 0 ? 'M' : 'L'} ${d.x},${d.yExp}`).join(' ');
+});
+
+const expenseAreaPath = computed(() => {
+  if (chartData.value.length === 0) return '';
+  const linePart = chartData.value.map((d, i) => `${i === 0 ? 'M' : 'L'} ${d.x},${d.yExp}`).join(' ');
+  const last = chartData.value[chartData.value.length - 1];
+  const first = chartData.value[0];
+  return `${linePart} L ${last.x},160 L ${first.x},160 Z`;
+});
+
+// Chart tooltip state
+const chartAreaRef = ref<HTMLElement | null>(null);
+const svgWrapperRef = ref<SVGSVGElement | null>(null);
+const activeChartIndex = ref(-1);
+const tooltipStyle = ref({ left: '0px', top: '0px', opacity: '0', transform: 'translate(-50%, -100%)' });
+const guideStyle = ref({ left: '0px', opacity: '0' });
+const incomePointStyle = ref({ left: '0px', top: '0px', opacity: '0' });
+const expensePointStyle = ref({ left: '0px', top: '0px', opacity: '0' });
+
+const tooltipData = computed(() => {
+  if (activeChartIndex.value < 0 || activeChartIndex.value >= chartData.value.length) {
+    return { month: '', income: '', expense: '' };
+  }
+  const d = chartData.value[activeChartIndex.value];
+  return {
+    month: d.month,
+    income: `Rp ${formatCompact(d.income)}`,
+    expense: `Rp ${formatCompact(d.expense)}`,
+  };
+});
+
+const formatCompact = (val: number) => {
+  if (val >= 1_000_000) return (val / 1_000_000).toFixed(1) + 'M';
+  if (val >= 1_000) return (val / 1_000).toFixed(0) + 'K';
+  return val.toLocaleString('id-ID');
+};
+
+const onChartMouseMove = (e: MouseEvent) => {
+  const el = chartAreaRef.value;
+  const svgEl = svgWrapperRef.value;
+  if (!el || !svgEl || chartData.value.length === 0) return;
+
+  const containerRect = el.getBoundingClientRect();
+  const svgRect = svgEl.getBoundingClientRect();
+
+  // SVG offset relative to the chart area container
+  const svgOffsetTop = svgRect.top - containerRect.top;
+  const svgWidth = svgRect.width;
+  const svgHeight = svgRect.height;
+
+  const padding = 8;
+  const x = e.clientX - containerRect.left - padding;
+  const width = containerRect.width - padding * 2;
+
+  const ratio = Math.max(0, Math.min(1, x / width));
+  const maxIdx = chartData.value.length - 1;
+  const closestIndex = Math.round(ratio * maxIdx);
+
+  if (closestIndex !== activeChartIndex.value && closestIndex >= 0 && closestIndex <= maxIdx) {
+    activeChartIndex.value = closestIndex;
+    const data = chartData.value[closestIndex];
+
+    const xPos = (data.x / 600) * width + padding;
+    // Y positions: map viewBox coordinates to actual SVG pixel height, then add SVG offset
+    const yIncPos = (data.yInc / 160) * svgHeight + svgOffsetTop;
+    const yExpPos = (data.yExp / 160) * svgHeight + svgOffsetTop;
+
+    guideStyle.value = { left: `${xPos}px`, opacity: '1' };
+    incomePointStyle.value = { left: `${xPos}px`, top: `${yIncPos}px`, opacity: '1' };
+    expensePointStyle.value = { left: `${xPos}px`, top: `${yExpPos}px`, opacity: '1' };
+
+    let transform = 'translate(-50%, -100%)';
+    if (closestIndex === 0) transform = 'translate(0%, -100%)';
+    else if (closestIndex === maxIdx) transform = 'translate(-100%, -100%)';
+
+    tooltipStyle.value = {
+      left: `${xPos}px`,
+      top: `${Math.min(yIncPos, yExpPos) - 15}px`,
+      opacity: '1',
+      transform,
+    };
+  }
+};
+
+const onChartMouseLeave = () => {
+  activeChartIndex.value = -1;
+  guideStyle.value = { left: '0px', opacity: '0' };
+  incomePointStyle.value = { left: '0px', top: '0px', opacity: '0' };
+  expensePointStyle.value = { left: '0px', top: '0px', opacity: '0' };
+  tooltipStyle.value = { left: '0px', top: '0px', opacity: '0', transform: 'translate(-50%, -100%)' };
+};
+
+// ─── Recent transactions (latest 5) ───────────────
 const recentTransactions = computed(() => {
   const sorted = [...transaksiStore.items].sort((a, b) =>
     new Date(b.tanggal_transaksi).getTime() - new Date(a.tanggal_transaksi).getTime()
@@ -153,13 +225,49 @@ const formatDate = (dateStr: string) => {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-// Sidebar ref
+// ─── Sidebar ref ──────────────────────────────────
 const sidebarRef = ref<InstanceType<typeof Sidebar> | null>(null);
 const isSidebarMinimized = computed(() => sidebarRef.value?.isMinimized ?? false);
 
-// Chart period selector
-const chartPeriod = ref('6bulan');
+// ─── Form Transaksi Modal ─────────────────────────
+const showFormTransaksi = ref(false);
 
+const openFormTransaksi = () => {
+  transaksiStore.resetPayload();
+  showFormTransaksi.value = true;
+};
+
+// ─── Profile Dropdown ─────────────────────────────
+const showProfileDropdown = ref(false);
+const profileDropdownRef = ref<HTMLElement | null>(null);
+const profileButtonRef = ref<HTMLElement | null>(null);
+
+const toggleProfileDropdown = (e: Event) => {
+  e.stopPropagation();
+  showProfileDropdown.value = !showProfileDropdown.value;
+};
+
+const closeProfileDropdown = (e: Event) => {
+  if (
+    profileDropdownRef.value &&
+    !profileDropdownRef.value.contains(e.target as Node) &&
+    profileButtonRef.value &&
+    !profileButtonRef.value.contains(e.target as Node)
+  ) {
+    showProfileDropdown.value = false;
+  }
+};
+
+const handleLogout = async () => {
+  try {
+    await authStore.logout();
+    window.location.href = '/login';
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+};
+
+// ─── Data Loading ─────────────────────────────────
 const loadData = async (id: string) => {
   if (!id) return;
   await Promise.all([
@@ -172,6 +280,11 @@ onMounted(() => {
   if (userID.value) {
     void loadData(userID.value);
   }
+  document.addEventListener('click', closeProfileDropdown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeProfileDropdown);
 });
 
 watch(userID, (id) => {
@@ -201,9 +314,55 @@ watch(userID, (id) => {
             <span class="material-symbols-outlined">notifications</span>
             <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
           </button>
-          <button class="hover:text-primary transition-colors flex items-center" id="btn-profile">
-            <span class="material-symbols-outlined text-3xl">account_circle</span>
-          </button>
+          <!-- Profile Button + Dropdown -->
+          <div class="relative">
+            <button
+              ref="profileButtonRef"
+              class="hover:text-primary transition-colors flex items-center"
+              id="profile-menu-button"
+              @click="toggleProfileDropdown"
+            >
+              <span class="material-symbols-outlined text-3xl">account_circle</span>
+            </button>
+            <!-- Profile Dropdown -->
+            <Transition
+              enter-active-class="profile-dropdown-enter-active"
+              leave-active-class="profile-dropdown-leave-active"
+              enter-from-class="profile-dropdown-enter-from"
+              leave-to-class="profile-dropdown-leave-to"
+            >
+              <div
+                v-if="showProfileDropdown"
+                ref="profileDropdownRef"
+                class="absolute top-full right-0 mt-2 w-56 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-xl overflow-hidden z-[60] flex flex-col"
+                id="profile-dropdown"
+              >
+                <div class="px-4 py-3 border-b border-outline-variant/10">
+                  <p class="font-label-md text-label-md text-on-background">{{ userName }}</p>
+                  <p class="font-label-sm text-label-sm text-on-surface-variant">{{ userEmail }}</p>
+                </div>
+                <div class="p-1">
+                  <RouterLink
+                    :to="`/profile/${userID}`"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-low transition-colors text-on-surface-variant"
+                    @click="showProfileDropdown = false"
+                  >
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="font-label-md text-label-md">Profil Saya</span>
+                  </RouterLink>
+
+                  <div class="my-1 border-t border-outline-variant/10"></div>
+                  <button
+                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-error-container/10 transition-colors text-error cursor-pointer"
+                    @click="handleLogout"
+                  >
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="font-label-md text-label-md">Logout</span>
+                  </button>
+                </div>
+              </div>
+            </Transition>
+          </div>
         </div>
       </header>
 
@@ -223,6 +382,7 @@ watch(userID, (id) => {
             <button
               id="btn-add-transaction"
               class="flex items-center gap-2 border-2 border-secondary text-secondary font-label-md text-label-md px-6 py-3 rounded-xl hover:bg-secondary/5 transition-colors"
+              @click="openFormTransaksi"
             >
               <span class="material-symbols-outlined">add</span>
               Tambah Transaksi
@@ -301,7 +461,7 @@ watch(userID, (id) => {
         <!-- Middle Section: Bento Grid -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
           <!-- Chart Area: Ringkasan Bulanan (Span 2 cols) -->
-          <div class="lg:col-span-2 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col" id="chart-ringkasan">
+          <div class="lg:col-span-2 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col chart-container" id="chart-ringkasan">
             <div class="flex justify-between items-center mb-6">
               <h3 class="font-headline-md text-headline-md text-on-background">Ringkasan Bulanan</h3>
               <select
@@ -313,13 +473,87 @@ watch(userID, (id) => {
                 <option value="bulanLalu">Bulan Lalu</option>
               </select>
             </div>
-            <div class="flex-1 min-h-[280px]">
-              <ApexChart
-                height="280"
-                type="bar"
-                :options="ringkasanChartOptions"
-                :series="ringkasanSeries"
-              />
+            <!-- SVG Line Chart -->
+            <div
+              ref="chartAreaRef"
+              class="flex-1 min-h-[240px] relative w-full flex items-end justify-between px-2"
+              @mousemove="onChartMouseMove"
+              @mouseleave="onChartMouseLeave"
+            >
+              <!-- Grid lines -->
+              <div class="absolute inset-0 flex flex-col justify-between pb-12 z-0">
+                <div class="border-b border-outline-variant/10 w-full h-0"></div>
+                <div class="border-b border-outline-variant/10 w-full h-0"></div>
+                <div class="border-b border-outline-variant/10 w-full h-0"></div>
+                <div class="border-b border-outline-variant/10 w-full h-0"></div>
+              </div>
+
+              <div class="relative z-10 w-full h-full flex flex-col justify-end">
+                <svg ref="svgWrapperRef" class="w-full h-48 overflow-visible" viewBox="0 0 600 160" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#00a472" stop-opacity="0.2" />
+                      <stop offset="100%" stop-color="#00a472" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#ba1a1a" stop-opacity="0.2" />
+                      <stop offset="100%" stop-color="#ba1a1a" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <!-- Income line + area -->
+                  <path :d="incomePath" fill="none" stroke="#00a472" stroke-width="3" stroke-linecap="round" />
+                  <path :d="incomeAreaPath" :fill="'url(#incomeGradient)'" />
+                  <!-- Expense line + area -->
+                  <path :d="expensePath" fill="none" stroke="#ba1a1a" stroke-width="3" stroke-linecap="round" />
+                  <path :d="expenseAreaPath" :fill="'url(#expenseGradient)'" />
+                </svg>
+
+                <!-- Month labels -->
+                <div class="flex justify-between px-4 mt-4 relative z-0">
+                  <span
+                    v-for="(d, i) in chartData"
+                    :key="i"
+                    class="font-label-sm text-label-sm w-8 text-center"
+                    :class="i === activeChartIndex ? 'text-primary font-semibold' : 'text-outline'"
+                  >{{ d.month }}</span>
+                </div>
+              </div>
+
+              <!-- Interactive tooltip elements -->
+              <div class="chart-guide-line" :style="guideStyle"></div>
+              <div class="chart-point" style="border-color: #00a472;" :style="incomePointStyle"></div>
+              <div class="chart-point" style="border-color: #ba1a1a;" :style="expensePointStyle"></div>
+              <div class="chart-tooltip glass-ai rounded-xl p-3 shadow-lg min-w-[140px]" :style="tooltipStyle">
+                <p class="font-label-md text-label-md text-[#1E293B] mb-2 border-b border-outline-variant/20 pb-1">{{ tooltipData.month }}</p>
+                <div class="space-y-1">
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-1.5">
+                      <span class="w-2 h-2 rounded-full bg-[#00a472]"></span>
+                      <span class="font-label-sm text-label-sm text-on-surface-variant">Pemasukan</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm font-semibold text-[#00a472]">{{ tooltipData.income }}</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-1.5">
+                      <span class="w-2 h-2 rounded-full bg-[#ba1a1a]"></span>
+                      <span class="font-label-sm text-label-sm text-on-surface-variant">Pengeluaran</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm font-semibold text-[#ba1a1a]">{{ tooltipData.expense }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="flex justify-center gap-6 mt-4 pt-4 border-t border-outline-variant/10 relative z-0">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-on-tertiary-container"></span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">Pemasukan</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-error"></span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">Pengeluaran</span>
+              </div>
             </div>
           </div>
 
@@ -427,5 +661,11 @@ watch(userID, (id) => {
 
       <ChatBot id="btn-ai-chatbot" />
     </div>
+
+    <!-- Transaction Form Modal -->
+    <FormTransaksi
+      :show="showFormTransaksi"
+      @update:show="showFormTransaksi = $event"
+    />
   </div>
 </template>
