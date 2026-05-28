@@ -1,5 +1,11 @@
+<script lang="ts">
+export default {
+  name: 'DashboardView'
+};
+</script>
+
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch, nextTick } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
 import { useTransaksiStore } from '@/stores/transaksi';
@@ -7,6 +13,7 @@ import { useAnggaranStore } from '@/stores/anggaran';
 import Sidebar from '@/components/sidebar.vue';
 import ChatBot from '@/components/chatBot.vue';
 import FormTransaksi from '@/components/formTransaksi.vue';
+import ProfileDropdown from '@/components/profile.vue';
 
 const transaksiStore = useTransaksiStore();
 const authStore = useAuthStore();
@@ -14,7 +21,6 @@ const anggaranStore = useAnggaranStore();
 
 const userID = computed(() => authStore.user?.id ?? '');
 const userName = computed(() => authStore.user?.user_metadata?.nama_lengkap ?? 'User');
-const userEmail = computed(() => authStore.user?.email ?? '');
 
 const { transaksiByJenis, ringkasan6BulanApex } = storeToRefs(transaksiStore);
 const { items: anggaranItems } = storeToRefs(anggaranStore);
@@ -65,13 +71,15 @@ const chartData = computed(() => {
   const pointCount = categories.length || 1;
 
   return categories.map((month: string, i: number) => {
+    const inc = incomeData[i] ?? 0;
+    const exp = expenseData[i] ?? 0;
     const x = pointCount > 1 ? (i / (pointCount - 1)) * viewBoxWidth : viewBoxWidth / 2;
-    const yInc = viewBoxHeight - (incomeData[i] / maxVal) * (viewBoxHeight - 10);
-    const yExp = viewBoxHeight - (expenseData[i] / maxVal) * (viewBoxHeight - 10);
+    const yInc = viewBoxHeight - (inc / maxVal) * (viewBoxHeight - 10);
+    const yExp = viewBoxHeight - (exp / maxVal) * (viewBoxHeight - 10);
     return {
       month,
-      income: incomeData[i],
-      expense: expenseData[i],
+      income: inc,
+      expense: exp,
       x,
       yInc,
       yExp,
@@ -89,7 +97,7 @@ const incomeAreaPath = computed(() => {
   const linePart = chartData.value.map((d, i) => `${i === 0 ? 'M' : 'L'} ${d.x},${d.yInc}`).join(' ');
   const last = chartData.value[chartData.value.length - 1];
   const first = chartData.value[0];
-  return `${linePart} L ${last.x},160 L ${first.x},160 Z`;
+  return `${linePart} L ${last?.x ?? 0},160 L ${first?.x ?? 0},160 Z`;
 });
 
 const expensePath = computed(() => {
@@ -102,7 +110,7 @@ const expenseAreaPath = computed(() => {
   const linePart = chartData.value.map((d, i) => `${i === 0 ? 'M' : 'L'} ${d.x},${d.yExp}`).join(' ');
   const last = chartData.value[chartData.value.length - 1];
   const first = chartData.value[0];
-  return `${linePart} L ${last.x},160 L ${first.x},160 Z`;
+  return `${linePart} L ${last?.x ?? 0},160 L ${first?.x ?? 0},160 Z`;
 });
 
 // Chart tooltip state
@@ -119,6 +127,7 @@ const tooltipData = computed(() => {
     return { month: '', income: '', expense: '' };
   }
   const d = chartData.value[activeChartIndex.value];
+  if (!d) return { month: '', income: '', expense: '' };
   return {
     month: d.month,
     income: `Rp ${formatCompact(d.income)}`,
@@ -142,7 +151,6 @@ const onChartMouseMove = (e: MouseEvent) => {
 
   // SVG offset relative to the chart area container
   const svgOffsetTop = svgRect.top - containerRect.top;
-  const svgWidth = svgRect.width;
   const svgHeight = svgRect.height;
 
   const padding = 8;
@@ -156,6 +164,7 @@ const onChartMouseMove = (e: MouseEvent) => {
   if (closestIndex !== activeChartIndex.value && closestIndex >= 0 && closestIndex <= maxIdx) {
     activeChartIndex.value = closestIndex;
     const data = chartData.value[closestIndex];
+    if (!data) return;
 
     const xPos = (data.x / 600) * width + padding;
     // Y positions: map viewBox coordinates to actual SVG pixel height, then add SVG offset
@@ -237,35 +246,7 @@ const openFormTransaksi = () => {
   showFormTransaksi.value = true;
 };
 
-// ─── Profile Dropdown ─────────────────────────────
-const showProfileDropdown = ref(false);
-const profileDropdownRef = ref<HTMLElement | null>(null);
-const profileButtonRef = ref<HTMLElement | null>(null);
 
-const toggleProfileDropdown = (e: Event) => {
-  e.stopPropagation();
-  showProfileDropdown.value = !showProfileDropdown.value;
-};
-
-const closeProfileDropdown = (e: Event) => {
-  if (
-    profileDropdownRef.value &&
-    !profileDropdownRef.value.contains(e.target as Node) &&
-    profileButtonRef.value &&
-    !profileButtonRef.value.contains(e.target as Node)
-  ) {
-    showProfileDropdown.value = false;
-  }
-};
-
-const handleLogout = async () => {
-  try {
-    await authStore.logout();
-    window.location.href = '/login';
-  } catch (error) {
-    console.error('Logout error:', error);
-  }
-};
 
 // ─── Data Loading ─────────────────────────────────
 const loadData = async (id: string) => {
@@ -280,11 +261,6 @@ onMounted(() => {
   if (userID.value) {
     void loadData(userID.value);
   }
-  document.addEventListener('click', closeProfileDropdown);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeProfileDropdown);
 });
 
 watch(userID, (id) => {
@@ -314,55 +290,8 @@ watch(userID, (id) => {
             <span class="material-symbols-outlined">notifications</span>
             <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
           </button>
-          <!-- Profile Button + Dropdown -->
-          <div class="relative">
-            <button
-              ref="profileButtonRef"
-              class="hover:text-primary transition-colors flex items-center"
-              id="profile-menu-button"
-              @click="toggleProfileDropdown"
-            >
-              <span class="material-symbols-outlined text-3xl">account_circle</span>
-            </button>
-            <!-- Profile Dropdown -->
-            <Transition
-              enter-active-class="profile-dropdown-enter-active"
-              leave-active-class="profile-dropdown-leave-active"
-              enter-from-class="profile-dropdown-enter-from"
-              leave-to-class="profile-dropdown-leave-to"
-            >
-              <div
-                v-if="showProfileDropdown"
-                ref="profileDropdownRef"
-                class="absolute top-full right-0 mt-2 w-56 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-xl overflow-hidden z-[60] flex flex-col"
-                id="profile-dropdown"
-              >
-                <div class="px-4 py-3 border-b border-outline-variant/10">
-                  <p class="font-label-md text-label-md text-on-background">{{ userName }}</p>
-                  <p class="font-label-sm text-label-sm text-on-surface-variant">{{ userEmail }}</p>
-                </div>
-                <div class="p-1">
-                  <RouterLink
-                    :to="`/profile/${userID}`"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-low transition-colors text-on-surface-variant"
-                    @click="showProfileDropdown = false"
-                  >
-                    <span class="material-symbols-outlined">person</span>
-                    <span class="font-label-md text-label-md">Profil Saya</span>
-                  </RouterLink>
-
-                  <div class="my-1 border-t border-outline-variant/10"></div>
-                  <button
-                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-error-container/10 transition-colors text-error cursor-pointer"
-                    @click="handleLogout"
-                  >
-                    <span class="material-symbols-outlined">logout</span>
-                    <span class="font-label-md text-label-md">Logout</span>
-                  </button>
-                </div>
-              </div>
-            </Transition>
-          </div>
+          <!-- Profile Dropdown Component -->
+          <ProfileDropdown />
         </div>
       </header>
 
