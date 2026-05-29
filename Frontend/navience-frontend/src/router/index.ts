@@ -7,6 +7,7 @@ import Register from '@/views/Register.vue'
 import Dashboard from '@/views/Dashboard.vue'
 import Profile from '@/views/Profile.vue'
 import Transaksi from '@/views/Transaksi.vue'
+import Anggaran from '@/views/Anggaran.vue'
 
 const routes = [
   {
@@ -44,6 +45,13 @@ const routes = [
   {
     path: '/profile/:userId',
     component: Profile,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/anggaran/:userId',
+    component: Anggaran,
     meta: {
       requiresAuth: true
     }
