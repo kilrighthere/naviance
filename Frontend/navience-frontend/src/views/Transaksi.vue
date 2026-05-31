@@ -2,7 +2,6 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useTransaksiStore } from '@/stores/transaksi';
-import { supabase } from '@/services/supabase';
 import Sidebar from '@/components/sidebar.vue';
 import ChatBot from '@/components/chatBot.vue';
 import FormTransaksi from '@/components/formTransaksi.vue';

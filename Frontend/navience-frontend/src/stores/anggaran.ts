@@ -138,6 +138,13 @@ export const useAnggaranStore = defineStore('anggaran', () => {
         setLoading(true);
         setError(null);
 
+        if (isActiveExist(payload.id_kategori ?? '')) {
+            setError('Sudah terdapat anggaran aktif untuk kategori tersebut');
+            setLoading(false);
+            return;
+        }
+
+
         const validationError = validatePayload(payload);
         if (validationError) {
             setError(validationError);
@@ -146,11 +153,6 @@ export const useAnggaranStore = defineStore('anggaran', () => {
         }
 
         try {
-            if (isActiveExist(payload.id_kategori ?? '')) {
-                setError('Sudah terdapat anggaran aktif untuk kategori tersebut');
-                return;
-            }
-
             const { data, error } = await supabase
                 .from('anggaran')
                 .insert({

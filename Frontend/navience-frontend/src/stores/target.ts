@@ -93,5 +93,163 @@ export const useTargetStore = defineStore('target', () => {
         }
     }
 
+    async function fetchTargetAktif(userId:string) {
+        setLoading(true);
+        setError(null);
+        try {
+            const { data, error } = await supabase
+                .from('target')
+                .select('*')
+                .eq('id_pengguna', userId)
+                .eq('status', 'on going')
+                .single()
+            if (error) {
+                storeError.value = error.message;
+                throw error;
+            }
+            selected.value = data;
+                
+        } catch (error) {
+            if (!storeError.value && error instanceof Error) {
+                setError(error.message)
+            }
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function createTarget(userId:string, payload: Partial<TargetInsert>) {
+        setLoading(true);
+        setError(null);
+
+        if (hasActiveTarget()) {
+            setError('Tidak dapat menambahkan lebih dari satu target aktif ');
+            setLoading(false);
+            return;
+        } 
+
+        const validationError = validatePayload(payload);
+        if (validationError) {
+            setError(validationError);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('target')
+                .insert({
+                    id_pengguna: userId,
+                    nama_target: payload.nama_target,
+                    nominal_target: payload.nominal_target,
+                    deadline: payload.deadline,
+                    status: "on going" as TargetStatus
+                })
+                .select("*")
+                .single()
+            if (error) {
+                storeError.value = error.message;
+                throw error;
+            }
+            selected.value = data;
+
+        } catch (error) {
+            if (!storeError.value && error instanceof Error) {
+                setError(error.message)
+            }
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function updateTarget(userId:string, targetId: string, payload: Partial<TargetUpdate>) {
+        setLoading(true);
+        setError(null);
+
+        const validationError = validatePayload(payload);
+        if (validationError) {
+            setError(validationError);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('target')
+                .update({
+                    nama_target: payload.nama_target,
+                    nominal_target: payload.nominal_target,
+                    deadline: payload.deadline,
+                    status: (payload.status ?? 'on going') as TargetStatus
+                })
+                .eq('id_pengguna', userId)
+                .eq('id_target', targetId)
+                .select('*')
+                .single()
+            if (error) {
+                setError(error.message);
+                throw error;
+            }
+            resetPayload();
+            if (data) {
+                const nextItems = items.value.map(item =>
+                    item.id_target === data.id_target ? data : item
+                );
+                items.value = nextItems;
+            }
+        } catch (error) {
+            if (!storeError.value && error instanceof Error) {
+                setError(error.message)
+            }
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+
+    }
+
+    async function deleteTarget(userId:string, targetId:string) {
+        setLoading(true);
+        setError(null);
+        try {
+            const { data, error }= await supabase
+                .from('target')
+                .delete()
+                .eq('id_pengguna', userId)
+                .eq('id_target', targetId)
+            if (error) {
+                setError(error.message);
+                throw error;
+            }
+            items.value = items.value.filter(item => item.id_target !== targetId);
+        } catch (error) {
+            if (!storeError.value && error instanceof Error) {
+                setError(error.message)
+            }
+            throw error;
+        }finally{
+            setLoading(false);
+        }
+    }
+
+    return {
+        items,
+        selected,
+        payload,
+        isLoading,
+        storeError,
+        hasActiveTarget,
+        setPayload,
+        resetPayload,
+        setError,
+        setLoading,
+        fetchAll,
+        fetchTargetAktif,
+        createTarget,
+        updateTarget,
+        deleteTarget
+    }
 
 })
