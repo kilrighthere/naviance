@@ -203,7 +203,7 @@ export const useAnggaranStore = defineStore('anggaran', () => {
                 })
                 .eq('id_anggaran', anggaranId)
                 .eq('id_pengguna', userId)
-                .select()
+                .select("*")
                 .single()
             if (error) {
                 setError(error.message);
