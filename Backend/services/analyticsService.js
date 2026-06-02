@@ -107,8 +107,8 @@ export const getAnalyticsSummary = async (accessToken, userId, period, start, en
         data: {
             period,
             summary,
-            kategori_terbesar: kategoriTerbesar,
-            detail_kategori: detailKategori,
+            kategori_pengeluaran_terbesar: kategoriTerbesar,
+            detail_kategori_pengeluaran: detailKategori,
         },
         error: null,
     };
