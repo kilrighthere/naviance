@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-router.post("/", validateRequest(createAiPredictionSchema), createTransaksiPredict);
+router.post("/predict", validateRequest(createAiPredictionSchema), createTransaksiPredict);
 router.post("/confirm", validateRequest(confirmAiPredictionSchema), confirmTransaksiPredict);
 router.patch("/reject/:id_transaksi_ai", rejectTransaksiPredict);
 
