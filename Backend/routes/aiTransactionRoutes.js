@@ -12,4 +12,8 @@ router.post("/", validateRequest(createAiPredictionSchema), createTransaksiPredi
 router.post("/confirm", validateRequest(confirmAiPredictionSchema), confirmTransaksiPredict);
 router.patch("/reject/:id_transaksi_ai", rejectTransaksiPredict);
 
+router.get("/", (_req, res) => {
+  res.json({ ok: true });
+});
+
 export default router;
