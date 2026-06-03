@@ -212,8 +212,11 @@ export const useTransaksiStore = defineStore('transaksi', () => {
         if (!value.jenis_transaksi) {
             return 'Jenis transaksi wajib dipilih.';
         }
-        if (value.nama_transaksi && value.nama_transaksi.trim().length < 3) {
-            return 'Nama transaksi minimal 3 karakter.';
+        if (!value.nama_transaksi || value.nama_transaksi.trim().length < 3) {
+            return 'Nama transaksi wajib diisi (minimal 3 karakter).';
+        }
+        if (!value.deskripsi || value.deskripsi.trim().length === 0) {
+            return 'Deskripsi wajib diisi.';
         }
         return null;
     }

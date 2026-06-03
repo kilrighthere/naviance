@@ -8,6 +8,7 @@ import Dashboard from '@/views/Dashboard.vue'
 import Profile from '@/views/Profile.vue'
 import Transaksi from '@/views/Transaksi.vue'
 import Anggaran from '@/views/Anggaran.vue'
+import Target from '@/views/Target.vue'
 
 const routes = [
   {
@@ -52,6 +53,13 @@ const routes = [
   {
     path: '/anggaran/:userId',
     component: Anggaran,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/target/:userId',
+    component: Target,
     meta: {
       requiresAuth: true
     }

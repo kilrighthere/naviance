@@ -32,6 +32,23 @@ const close = () => {
 const handleSave = async () => {
   const userID = authStore.user?.id;
   if (!userID) return;
+
+  if (transaksiStore.payload.jenis_transaksi === 'tabungan') {
+    if (!transaksiStore.payload.id_target) {
+      const { useTargetStore } = await import('@/stores/target');
+      const targetStore = useTargetStore();
+      await targetStore.fetchTargetAktif(userID);
+      if (targetStore.selected) {
+        transaksiStore.payload.id_target = targetStore.selected.id_target;
+      } else {
+        alert('Tidak ada target aktif. Transaksi tabungan tidak dapat ditambahkan tanpa target.');
+        return;
+      }
+    }
+  } else {
+    transaksiStore.payload.id_target = null;
+  }
+
   try {
     if (props.mode === 'edit' && props.transaksiId) {
       await transaksiStore.updateTransaksi(userID, props.transaksiId, transaksiStore.payload);
@@ -120,7 +137,7 @@ const handleDelete = async () => {
 
         <div class="space-y-1.5">
           <label class="font-label-md text-label-md text-on-surface-variant px-1">Deskripsi</label>
-          <textarea class="w-full px-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-body-md text-body-md text-on-surface" placeholder="Tambah catatan..." rows="2" v-model="transaksiStore.payload.deskripsi"></textarea>
+          <textarea class="w-full px-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-body-md text-body-md text-on-surface" placeholder="Tambah catatan..." rows="2" v-model="transaksiStore.payload.deskripsi" required></textarea>
         </div>
 
         <div class="flex gap-4 pt-4">
