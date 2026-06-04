@@ -44,3 +44,7 @@ pnpm-debug.log*
 *.pem
 *.key
 *.crt
+
+*.keras
+*.joblib
+model/
