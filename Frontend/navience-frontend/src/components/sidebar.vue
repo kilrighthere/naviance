@@ -29,13 +29,11 @@ const navItems = [
   { icon: 'account_balance_wallet', label: 'Budget', to: () => `/anggaran/${userID.value}`, filled: false },
   { icon: 'query_stats', label: 'Forecasting', to: () => `/forecasting/${userID.value}`, filled: false },
   { icon: 'target', label: 'Goals', to: () => `/target/${userID.value}`, filled: false },
+  { icon: 'smart_toy', label: 'Chatbot', to: () => `/chatbot/${userID.value}`, filled: false },
   { icon: 'person', label: 'Profile', to: () => `/profile/${userID.value}`, filled: false },
 ];
 
-const footerItems = [
-  { icon: 'settings', label: 'Settings', to: () => '#' },
-  { icon: 'help_outline', label: 'Support', to: () => '#' },
-];
+
 
 const isActive = (to: string) => {
   return route.path === to || route.path.startsWith(to + '/');
@@ -98,15 +96,6 @@ defineExpose({ isMinimized });
     <!-- Footer Tabs -->
     <div class="mt-auto border-t border-outline-variant/20 pt-4 pb-2">
       <ul class="space-y-1 mb-4">
-        <li v-for="item in footerItems" :key="item.label">
-          <a
-            :href="item.to()"
-            class="sidebar-link flex items-center gap-unit text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors px-4 py-3 rounded-lg mx-1"
-          >
-            <span class="material-symbols-outlined">{{ item.icon }}</span>
-            <span class="sidebar-label font-label-md text-label-md">{{ item.label }}</span>
-          </a>
-        </li>
         <li>
           <button
             @click="handleLogout"
