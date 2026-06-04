@@ -24,7 +24,7 @@ def info():
         "scaler_type": str(type(scaler))
     }
 
-@app.get("/")
+@app.get("/health")
 def health():
     return {
         "status": "ok"
