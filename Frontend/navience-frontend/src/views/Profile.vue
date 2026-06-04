@@ -187,13 +187,10 @@ async function handleDeleteAccount() {
       <!-- Top App Bar -->
       <header class="flex justify-between items-center w-full px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10">
         <div class="flex items-center gap-4">
-          <h2 class="font-headline-md text-headline-md text-primary">Profile</h2>
+          <h2 class="font-headline-md text-headline-md text-primary">Profil</h2>
         </div>
         <div class="flex items-center gap-6 text-on-surface-variant">
-          <button class="hover:text-primary transition-colors relative" id="btn-notifications-profile">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
-          </button>
+
           <button class="hover:text-primary transition-colors flex items-center" id="btn-profile-avatar">
             <span class="material-symbols-outlined text-3xl">account_circle</span>
           </button>
@@ -202,13 +199,13 @@ async function handleDeleteAccount() {
 
       <!-- Scrollable Main Canvas -->
       <main class="flex-1 overflow-y-auto p-margin-desktop space-y-10">
-        <div class="flex flex-col gap-12 max-w-3xl mx-auto pb-24">
+        <div class="max-w-6xl mx-auto pb-6 w-full px-4 md:px-0 mt-4 md:mt-0">
 
           <!-- Section 1: Header/Avatar -->
-          <section class="flex flex-col items-center text-center profile-header-section">
+          <section class="flex flex-col items-center text-center profile-header-section mb-6">
             <div class="relative group cursor-pointer mb-4">
-              <div class="w-32 h-32 rounded-full bg-primary-container border-4 border-surface-container-lowest shadow-sm flex items-center justify-center relative overflow-hidden profile-avatar-ring">
-                <span class="text-white font-headline-lg text-4xl select-none">{{ userInitials }}</span>
+              <div class="w-24 h-24 rounded-full bg-primary-container border-4 border-surface-container-lowest shadow-sm flex items-center justify-center relative overflow-hidden profile-avatar-ring">
+                <span class="text-white font-headline-lg text-3xl select-none">{{ userInitials }}</span>
                 <!-- Hover overlay -->
                 <div class="absolute inset-0 bg-primary/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <span class="material-symbols-outlined text-on-primary" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
@@ -220,16 +217,20 @@ async function handleDeleteAccount() {
             </h2>
             <p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-2 justify-center">
               <span class="material-symbols-outlined text-secondary-container" style="font-variation-settings: 'FILL' 1;">verified</span>
-              Naviance Member since {{ memberSince }}
+              Anggota sejak {{ memberSince }}
             </p>
           </section>
 
-          <!-- Section 2: Account Information -->
-          <section class="bg-surface-container-lowest rounded-2xl shadow-[0_4px_12px_rgba(30,41,59,0.05)] border border-outline-variant/30 p-6 md:p-8 profile-account-section" id="profile-account-info">
-            <div class="flex items-center gap-3 mb-6 border-b border-outline-variant/20 pb-4">
-              <span class="material-symbols-outlined text-primary">badge</span>
-              <h3 class="font-headline-md text-headline-md text-primary">Account Information</h3>
-            </div>
+          <!-- Combined Account & Security Card -->
+          <section class="bg-surface-container-lowest rounded-2xl shadow-[0_4px_12px_rgba(30,41,59,0.05)] border border-outline-variant/30 p-6 md:p-8 profile-account-section mb-4 w-full" id="profile-combined-info">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+              
+              <!-- Left side: Account Info -->
+              <div>
+                <div class="flex items-center gap-3 mb-6 border-b border-outline-variant/20 pb-4">
+                  <span class="material-symbols-outlined text-primary">badge</span>
+                  <h3 class="font-headline-md text-headline-md text-primary">Informasi Akun</h3>
+                </div>
 
             <!-- Error message -->
             <div v-if="saveError" class="mb-4 p-3 bg-error-container/30 border border-error/20 rounded-lg flex items-center gap-2 animate-fade-in">
@@ -237,10 +238,10 @@ async function handleDeleteAccount() {
               <span class="font-label-sm text-label-sm text-error">{{ saveError }}</span>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex flex-col gap-4">
               <!-- Full Name -->
               <div class="flex flex-col gap-1.5">
-                <label class="font-label-sm text-label-sm text-on-surface-variant">Full Name</label>
+                <label class="font-label-sm text-label-sm text-on-surface-variant">Nama Lengkap</label>
                 <!-- Display mode -->
                 <div v-if="!isEditingName" class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low border border-outline-variant/20 transition-all hover:border-outline-variant/40">
                   <span class="font-body-md text-body-md text-on-background">{{ userName }}</span>
@@ -285,7 +286,7 @@ async function handleDeleteAccount() {
 
               <!-- Email Address -->
               <div class="flex flex-col gap-1.5">
-                <label class="font-label-sm text-label-sm text-on-surface-variant">Email Address</label>
+                <label class="font-label-sm text-label-sm text-on-surface-variant">Alamat Email</label>
                 <!-- Display mode -->
                 <div v-if="!isEditingEmail" class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low border border-outline-variant/20 transition-all hover:border-outline-variant/40">
                   <span class="font-body-md text-body-md text-on-background">{{ userEmail }}</span>
@@ -328,23 +329,23 @@ async function handleDeleteAccount() {
                 </div>
               </div>
             </div>
-          </section>
+              </div> <!-- End Account Info -->
 
-          <!-- Section 3: Security (Change Password) -->
-          <section class="bg-surface-container-lowest rounded-2xl shadow-[0_4px_12px_rgba(30,41,59,0.05)] border border-outline-variant/30 p-6 md:p-8 profile-security-section" id="profile-security">
-            <div class="flex items-center gap-3 mb-6 border-b border-outline-variant/20 pb-4">
-              <span class="material-symbols-outlined text-primary">shield_lock</span>
-              <h3 class="font-headline-md text-headline-md text-primary">Security</h3>
-            </div>
+              <!-- Right side: Security -->
+              <div>
+                <div class="flex items-center gap-3 mb-6 border-b border-outline-variant/20 pb-4">
+                  <span class="material-symbols-outlined text-primary">shield_lock</span>
+                  <h3 class="font-headline-md text-headline-md text-primary">Keamanan</h3>
+                </div>
 
-            <div class="flex flex-col gap-4">
-              <div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low border border-outline-variant/20">
-                <div class="flex items-center gap-3">
-                  <span class="material-symbols-outlined text-on-surface-variant">lock</span>
-                  <div>
-                    <p class="font-label-md text-label-md text-on-background">Password</p>
-                    <p class="font-label-sm text-label-sm text-on-surface-variant">Ubah password akun Anda</p>
-                  </div>
+                <div class="flex flex-col gap-4">
+                  <div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low border border-outline-variant/20">
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-on-surface-variant">lock</span>
+                      <div>
+                        <p class="font-label-md text-label-md text-on-background">Kata Sandi</p>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant">Ubah kata sandi akun Anda</p>
+                      </div>
                 </div>
                 <button
                   @click="toggleChangePassword"
@@ -368,7 +369,7 @@ async function handleDeleteAccount() {
                   />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                  <label class="font-label-sm text-label-sm text-on-surface-variant">Konfirmasi Password</label>
+                  <label class="font-label-sm text-label-sm text-on-surface-variant">Konfirmasi Kata Sandi</label>
                   <input
                     v-model="confirmPassword"
                     type="password"
@@ -400,7 +401,7 @@ async function handleDeleteAccount() {
                   >
                     <span v-if="isSavingPassword" class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
                     <span v-else class="material-symbols-outlined text-[18px]">check</span>
-                    Simpan Password
+                    Simpan Kata Sandi
                   </button>
                   <button
                     @click="toggleChangePassword"
@@ -410,21 +411,23 @@ async function handleDeleteAccount() {
                   </button>
                 </div>
               </div>
-            </div>
-          </section>
+              </div>
+              </div> <!-- End Security -->
+            </div> <!-- End inner grid -->
+          </section> <!-- End Combined Card -->
 
-          <!-- Section 4: Danger Zone -->
-          <section class="mt-8" id="profile-danger-zone">
-            <div v-if="!showDeleteConfirm">
-              <button
-                @click="showDeleteConfirm = true"
-                class="w-full md:w-auto px-6 py-3 border-2 border-error text-error rounded-xl font-label-md text-label-md hover:bg-error-container/20 transition-colors flex items-center justify-center gap-2 ml-auto"
-                id="btn-delete-account"
-              >
-                <span class="material-symbols-outlined">delete_forever</span>
-                Delete Account
-              </button>
-            </div>
+          <!-- Section 4: Delete Account -->
+          <section class="w-full flex justify-start mt-4" id="profile-danger-zone">
+                <div v-if="!showDeleteConfirm" class="w-full sm:w-auto">
+                  <button
+                    @click="showDeleteConfirm = true"
+                    class="w-full sm:w-auto px-6 py-3 border border-error/50 text-error rounded-xl font-label-md text-label-md hover:bg-error/10 transition-colors flex items-center justify-center gap-2"
+                    id="btn-delete-account"
+                  >
+                    <span class="material-symbols-outlined">delete_forever</span>
+                    Hapus Akun
+                  </button>
+                </div>
 
             <!-- Delete confirmation -->
             <div v-else class="bg-error-container/10 border-2 border-error/30 rounded-2xl p-6 space-y-4 animate-fade-in">
@@ -461,7 +464,7 @@ async function handleDeleteAccount() {
                   Batal
                 </button>
               </div>
-            </div>
+            </div> <!-- End v-else div -->
           </section>
         </div>
       </main>

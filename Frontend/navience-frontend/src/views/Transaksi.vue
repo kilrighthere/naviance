@@ -101,10 +101,7 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
           </div>
         </div>
         <div class="flex items-center gap-4">
-          <button class="w-10 h-10 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors relative">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
-          </button>
+
           <div class="w-10 h-10 rounded-full bg-primary-fixed-dim border border-outline-variant/30 overflow-hidden cursor-pointer shadow-sm flex items-center justify-center text-on-primary-fixed">
             <span class="material-symbols-outlined">account_circle</span>
           </div>
@@ -122,9 +119,9 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
           <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <!-- Filters -->
             <div class="relative">
-              <select v-model="transaksiStore.filterCategory" class="appearance-none px-4 py-2 pl-10 pr-8 rounded-full border border-outline-variant/50 bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-colors shadow-sm focus:outline-none focus:border-primary cursor-pointer min-w-[140px]">
+              <select v-model="transaksiStore.filterCategory" class="appearance-none px-4 py-2 pl-10 pr-8 rounded-full border border-outline-variant/50 bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-colors shadow-sm focus:outline-none focus:border-primary cursor-pointer min-w-[140px] capitalize">
                 <option value="">Semua Kategori</option>
-                <option v-for="kat in CATEGORIES" :key="kat.id_kategori" :value="kat.id_kategori">{{ kat.nama_kategori }}</option>
+                <option v-for="kat in CATEGORIES" :key="kat.id_kategori" :value="kat.id_kategori" class="capitalize">{{ kat.nama_kategori }}</option>
               </select>
               <span class="material-symbols-outlined text-[18px] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">filter_list</span>
               <span class="material-symbols-outlined text-[18px] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">arrow_drop_down</span>
@@ -221,7 +218,7 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
                 </td>
                 <td class="px-6 py-5">
                   <span 
-                    class="px-3 py-1 rounded-md font-label-sm text-label-sm"
+                    class="px-3 py-1 rounded-md font-label-sm text-label-sm whitespace-nowrap capitalize"
                     :class="trx.jenis_transaksi === 'pemasukan' 
                       ? 'bg-tertiary-fixed/30 border border-tertiary-fixed/50 text-on-tertiary-container'
                       : 'bg-surface-container-high/50 border border-outline-variant/20 text-on-surface-variant'"

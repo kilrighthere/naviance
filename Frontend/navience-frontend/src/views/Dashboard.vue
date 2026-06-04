@@ -10,6 +10,7 @@ import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
 import { useTransaksiStore } from '@/stores/transaksi';
 import { useAnggaranStore } from '@/stores/anggaran';
+import { useTargetStore } from '@/stores/target';
 import Sidebar from '@/components/sidebar.vue';
 import ChatBot from '@/components/chatBot.vue';
 import FormTransaksi from '@/components/formTransaksi.vue';
@@ -18,6 +19,7 @@ import ProfileDropdown from '@/components/profile.vue';
 const transaksiStore = useTransaksiStore();
 const authStore = useAuthStore();
 const anggaranStore = useAnggaranStore();
+const targetStore = useTargetStore();
 
 const userID = computed(() => authStore.user?.id ?? '');
 const userName = computed(() => authStore.user?.user_metadata?.nama_lengkap ?? 'User');
@@ -50,6 +52,19 @@ const totalSisaAnggaran = computed(() => {
     .reduce((sum, item) => sum + item.nominal, 0);
 
   return totalAnggaran - totalTerpakai;
+});
+
+const totalTabungan = computed(() => {
+  if (!targetStore.selected) return 0;
+  return transaksiStore.items
+    .filter(t => t.id_target === targetStore.selected?.id_target && t.jenis_transaksi === 'tabungan')
+    .reduce((sum, t) => sum + t.nominal, 0);
+});
+
+const progressTabungan = computed(() => {
+  if (!targetStore.selected || targetStore.selected.nominal_target === 0) return 0;
+  const percentage = (totalTabungan.value / targetStore.selected.nominal_target) * 100;
+  return Math.min(100, Math.max(0, percentage));
 });
 
 // ─── SVG Line Chart Data ───────────────────────────
@@ -253,7 +268,8 @@ const loadData = async (id: string) => {
   if (!id) return;
   await Promise.all([
     transaksiStore.fetchAll(id),
-    anggaranStore.fetchAll(id)
+    anggaranStore.fetchAll(id),
+    targetStore.fetchTargetAktif(id)
   ]);
 };
 
@@ -286,10 +302,7 @@ watch(userID, (id) => {
           <h2 class="font-headline-md text-headline-md text-primary">Overview</h2>
         </div>
         <div class="flex items-center gap-6 text-on-surface-variant">
-          <button class="hover:text-primary transition-colors relative" id="btn-notifications">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
-          </button>
+
           <!-- Profile Dropdown Component -->
           <ProfileDropdown />
         </div>
@@ -492,23 +505,27 @@ watch(userID, (id) => {
             <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex-1" id="card-target-tabungan">
               <div class="flex justify-between items-center mb-6">
                 <h3 class="font-headline-md text-headline-md text-on-background">Target Tabungan</h3>
-                <button class="text-secondary-container hover:text-secondary transition-colors" id="btn-add-goal">
-                  <span class="material-symbols-outlined">add_circle</span>
-                </button>
+                <RouterLink :to="`/target/${userID}`" class="text-secondary-container hover:text-secondary transition-colors" id="btn-add-goal">
+                  <span class="material-symbols-outlined">{{ targetStore.selected ? 'arrow_forward' : 'add_circle' }}</span>
+                </RouterLink>
               </div>
               <!-- Progress Item -->
-              <div class="space-y-4">
+              <div v-if="targetStore.selected" class="space-y-4">
                 <div class="flex justify-between items-end">
                   <div>
-                    <h4 class="font-label-md text-label-md text-on-background">Dana Darurat</h4>
-                    <p class="font-label-sm text-label-sm text-on-surface-variant">Rp 10.000.000 / Rp 50.000.000</p>
+                    <h4 class="font-label-md text-label-md text-on-background">{{ targetStore.selected.nama_target }}</h4>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">Rp {{ totalTabungan.toLocaleString('id-ID') }} / Rp {{ targetStore.selected.nominal_target.toLocaleString('id-ID') }}</p>
                   </div>
-                  <span class="font-label-md text-label-md text-primary">20%</span>
+                  <span class="font-label-md text-label-md text-primary">{{ progressTabungan.toFixed(1) }}%</span>
                 </div>
                 <!-- Progress Bar -->
                 <div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-secondary-container to-secondary rounded-full" style="width: 20%;"></div>
+                  <div class="h-full bg-gradient-to-r from-secondary-container to-secondary rounded-full" :style="{ width: progressTabungan + '%' }"></div>
                 </div>
+              </div>
+              <div v-else class="py-4 text-center">
+                <p class="font-body-md text-body-md text-on-surface-variant mb-2">Belum ada target aktif</p>
+                <RouterLink :to="`/target/${userID}`" class="text-secondary font-label-md text-label-md hover:underline">Buat Target Sekarang</RouterLink>
               </div>
 
               <!-- AI Insight Card -->

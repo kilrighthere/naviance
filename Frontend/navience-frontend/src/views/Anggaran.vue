@@ -317,10 +317,7 @@ watch(userID, (id) => {
           <h2 class="font-headline-md text-headline-md text-primary tracking-tight">Anggaran</h2>
         </div>
         <div class="flex items-center gap-6 text-on-surface-variant">
-          <button class="hover:text-primary transition-colors relative" id="btn-notifications">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
-          </button>
+
           <ProfileDropdown />
         </div>
       </header>

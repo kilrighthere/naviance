@@ -25,17 +25,15 @@ const toggleSidebar = () => {
 
 const navItems = [
   { icon: 'dashboard', label: 'Dashboard', to: () => `/dashboard/${userID.value}`, filled: true },
-  { icon: 'receipt_long', label: 'Transactions', to: () => `/transaksi/${userID.value}`, filled: false },
-  { icon: 'account_balance_wallet', label: 'Budget', to: () => `/anggaran/${userID.value}`, filled: false },
-  { icon: 'query_stats', label: 'Forecasting', to: () => `/forecasting/${userID.value}`, filled: false },
-  { icon: 'target', label: 'Goals', to: () => `/target/${userID.value}`, filled: false },
-  { icon: 'person', label: 'Profile', to: () => `/profile/${userID.value}`, filled: false },
+  { icon: 'receipt_long', label: 'Transaksi', to: () => `/transaksi/${userID.value}`, filled: false },
+  { icon: 'account_balance_wallet', label: 'Anggaran', to: () => `/anggaran/${userID.value}`, filled: false },
+  { icon: 'query_stats', label: 'Prediksi', to: () => `/forecasting/${userID.value}`, filled: false },
+  { icon: 'target', label: 'Target', to: () => `/target/${userID.value}`, filled: false },
+  { icon: 'smart_toy', label: 'Chatbot', to: () => `/chatbot/${userID.value}`, filled: false },
+  { icon: 'person', label: 'Profil', to: () => `/profile/${userID.value}`, filled: false },
 ];
 
-const footerItems = [
-  { icon: 'settings', label: 'Settings', to: () => '#' },
-  { icon: 'help_outline', label: 'Support', to: () => '#' },
-];
+
 
 const isActive = (to: string) => {
   return route.path === to || route.path.startsWith(to + '/');
@@ -58,10 +56,9 @@ defineExpose({ isMinimized });
         class="material-symbols-outlined transition-transform duration-300"
         :style="{ transform: isMinimized ? 'rotate(180deg)' : 'rotate(0deg)' }"
       >chevron_left</span>
-      <!-- Tooltip -->
       <span
         class="absolute left-full ml-2 px-2 py-1 bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50"
-      >{{ isMinimized ? 'Expand' : 'Collapse' }}</span>
+      >{{ isMinimized ? 'Buka' : 'Tutup' }}</span>
     </button>
 
     <!-- Header (Expanded) -->
@@ -98,22 +95,13 @@ defineExpose({ isMinimized });
     <!-- Footer Tabs -->
     <div class="mt-auto border-t border-outline-variant/20 pt-4 pb-2">
       <ul class="space-y-1 mb-4">
-        <li v-for="item in footerItems" :key="item.label">
-          <a
-            :href="item.to()"
-            class="sidebar-link flex items-center gap-unit text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors px-4 py-3 rounded-lg mx-1"
-          >
-            <span class="material-symbols-outlined">{{ item.icon }}</span>
-            <span class="sidebar-label font-label-md text-label-md">{{ item.label }}</span>
-          </a>
-        </li>
         <li>
           <button
             @click="handleLogout"
             class="sidebar-link w-[calc(100%-8px)] flex items-center gap-unit text-error hover:bg-error/10 hover:text-error transition-colors px-4 py-3 rounded-lg mx-1 cursor-pointer text-left font-label-md text-label-md"
           >
             <span class="material-symbols-outlined">logout</span>
-            <span class="sidebar-label">Logout</span>
+            <span class="sidebar-label">Keluar</span>
           </button>
         </li>
       </ul>
