@@ -45,6 +45,12 @@ pnpm-debug.log*
 *.key
 *.crt
 
+# global ignore
 *.keras
 *.joblib
-models/
+model/
+
+# exception untuk ML service
+!ML-Services/model/
+!ML-Services/model/*.keras
+!ML-Services/model/*.joblib
