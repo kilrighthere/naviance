@@ -197,12 +197,7 @@ function renderMarkdown(text: string): string {
             <h1 class="font-headline-md text-headline-md text-primary-container tracking-tight">
               Asisten AI Naviance
             </h1>
-            <p
-              class="font-body-md text-body-md text-on-surface-variant mt-0.5 flex items-center gap-2 text-sm"
-            >
-              <span class="material-symbols-outlined text-[16px] text-secondary">auto_awesome</span>
-              Kecerdasan finansial pribadi Anda
-            </p>
+
           </div>
         </div>
         <div class="flex items-center gap-4 text-on-surface-variant">
@@ -229,7 +224,8 @@ function renderMarkdown(text: string): string {
           <!-- Messages / Empty State Area -->
           <div
             ref="chatScrollRef"
-            class="flex-1 overflow-y-auto p-4 md:p-6 chat-scroll bg-surface/50"
+            class="flex-1 p-4 md:p-6 chat-scroll bg-surface/50"
+            :class="isEmpty ? 'overflow-hidden flex flex-col justify-center' : 'overflow-y-auto'"
           >
             <!-- ===== EMPTY STATE (Initial View) ===== -->
             <div
@@ -237,24 +233,7 @@ function renderMarkdown(text: string): string {
               class="max-w-4xl mx-auto flex flex-col items-center py-12 px-4"
             >
               <!-- Animated Bot Avatar -->
-              <div class="relative mb-6">
-                <div
-                  class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-container to-primary flex items-center justify-center shadow-lg chatbot-avatar-glow"
-                >
-                  <span class="material-symbols-outlined icon-fill text-on-primary text-[40px]"
-                    >smart_toy</span
-                  >
-                </div>
-                <div
-                  class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center shadow-md"
-                >
-                  <span
-                    class="material-symbols-outlined icon-fill text-on-secondary-container text-[14px]"
-                    >auto_awesome</span
-                  >
-                </div>
-              </div>
-
+              <!-- Removed Avatar here as requested -->
               <div class="text-center mb-10">
                 <h2
                   class="font-headline-lg text-headline-lg text-primary-container mb-2"
@@ -293,15 +272,7 @@ function renderMarkdown(text: string): string {
                 </button>
               </div>
 
-              <!-- Info Banner -->
-              <div
-                class="mt-12 p-4 rounded-xl bg-secondary-fixed/20 border border-secondary/10 flex items-center gap-3 max-w-lg"
-              >
-                <span class="material-symbols-outlined text-secondary">info</span>
-                <p class="font-label-sm text-on-surface-variant">
-                  Naviance AI menggunakan akses baca-saja yang aman ke data keuangan Anda.
-                </p>
-              </div>
+              <!-- Info Banner Removed -->
             </div>
 
             <!-- ===== CHAT MESSAGES ===== -->
@@ -335,7 +306,7 @@ function renderMarkdown(text: string): string {
                   >
                     <span
                       class="material-symbols-outlined icon-fill text-on-secondary-container text-[18px]"
-                      >smart_toy</span
+                      >auto_awesome</span
                     >
                   </div>
                   <div class="max-w-[85%]">
@@ -363,7 +334,7 @@ function renderMarkdown(text: string): string {
                 >
                   <span
                     class="material-symbols-outlined icon-fill text-on-secondary-container text-[18px]"
-                    >smart_toy</span
+                    >auto_awesome</span
                   >
                 </div>
                 <div

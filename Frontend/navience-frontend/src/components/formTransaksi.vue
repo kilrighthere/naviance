@@ -247,9 +247,9 @@ const handleDelete = async () => {
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1.5">
               <label class="font-label-md text-label-md text-on-surface-variant px-1">Kategori</label>
-              <select class="w-full px-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-body-md text-body-md text-on-surface" v-model="transaksiStore.payload.id_kategori" required>
+              <select class="w-full px-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-body-md text-body-md text-on-surface capitalize" v-model="transaksiStore.payload.id_kategori" required>
                 <option value="" disabled>Pilih Kategori</option>
-                <option v-for="kat in categories" :key="kat.id_kategori" :value="kat.id_kategori">{{ kat.nama_kategori }}</option>
+                <option v-for="kat in categories" :key="kat.id_kategori" :value="kat.id_kategori" class="capitalize">{{ kat.nama_kategori }}</option>
               </select>
             </div>
             <div class="space-y-1.5">

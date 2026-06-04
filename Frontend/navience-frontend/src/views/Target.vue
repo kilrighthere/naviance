@@ -79,10 +79,7 @@ const handleSaveTarget = async (data: { nama_target: string; nominal_target: num
             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
             <input class="pl-10 pr-4 py-2 rounded-full border border-outline-variant bg-surface-container-lowest focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-secondary-container transition-all text-body-md font-body-md w-48 lg:w-64" placeholder="Cari..." type="text"/>
           </div>
-          <button class="hover:text-primary transition-colors relative" id="btn-notifications">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
-          </button>
+
           <!-- Profile Dropdown Component -->
           <ProfileDropdown />
         </div>

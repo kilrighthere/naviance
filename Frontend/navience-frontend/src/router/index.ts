@@ -10,6 +10,7 @@ import Transaksi from '@/views/Transaksi.vue'
 import Anggaran from '@/views/Anggaran.vue'
 import Target from '@/views/Target.vue'
 import Chatbot from '@/views/Chatbot.vue'
+import Forecasting from '@/views/Forecasting.vue'
 
 const routes = [
   {
@@ -68,6 +69,13 @@ const routes = [
   {
     path: '/chatbot/:userId',
     component: Chatbot,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/forecasting/:userId',
+    component: Forecasting,
     meta: {
       requiresAuth: true
     }
