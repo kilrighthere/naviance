@@ -16,7 +16,7 @@ const endOfWeek = (date) => {
 	return endOfDay(end);
 };
 
-const formatLocalDate = (date) => {
+export const formatLocalDate = (date) => {
 	return [
 		date.getFullYear(),
 		String(date.getMonth() + 1).padStart(2, "0"),

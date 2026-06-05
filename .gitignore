@@ -4,6 +4,14 @@
 !.env.example
 .env.*.local
 
+ML-Services/venv/
+**/__pycache__/
+.env
+
+**/venv/
+**/__pycache__/
+.env
+
 # Node
 node_modules/
 dist/
@@ -36,3 +44,13 @@ pnpm-debug.log*
 *.pem
 *.key
 *.crt
+
+# global ignore
+*.keras
+*.joblib
+model/
+
+# exception untuk ML service
+!ML-Services/model/
+!ML-Services/model/*.keras
+!ML-Services/model/*.joblib

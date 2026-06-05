@@ -3,6 +3,7 @@ import cors from "cors";
 import transactionRoutes from "./routes/transactionRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import aiTransactionRoutes from "./routes/aiTransactionRoutes.js";
+import patternPredictRoutes from "./routes/patternPredictRoutes.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/chatbot", aiTransactionRoutes);
+app.use("/api/v1/pattern", patternPredictRoutes);
 
 app.use((err, _req, res, _next) => {
     console.error(err);
