@@ -62,14 +62,17 @@ defineExpose({ isMinimized });
     </button>
 
     <!-- Header (Expanded) -->
-    <div class="sidebar-header px-4 py-4 mb-4">
-      <h1 class="text-headline-md font-headline-md font-extrabold text-primary">Naviance</h1>
-      <p class="font-label-sm text-label-sm text-primary">Navigate Your Finance</p>
+    <div class="sidebar-header px-4 py-4 mb-4 flex items-center gap-3">
+      <img src="@/assets/logo.png" alt="Naviance Logo" class="w-8 h-8 object-contain" />
+      <div>
+        <h1 class="text-headline-md font-headline-md font-extrabold text-primary leading-tight">Naviance</h1>
+        <p class="font-label-sm text-label-sm text-primary">Navigate Your Finance</p>
+      </div>
     </div>
 
     <!-- Logo (Minimized) -->
-    <div class="minimized-logo pt-4 pb-2">
-      <span class="material-symbols-outlined text-primary text-3xl font-bold">dashboard_customize</span>
+    <div class="minimized-logo pt-4 pb-2 flex justify-center">
+      <img src="@/assets/logo.png" alt="Naviance Logo" class="w-8 h-8 object-contain" />
     </div>
 
     <!-- Main Navigation Tabs -->

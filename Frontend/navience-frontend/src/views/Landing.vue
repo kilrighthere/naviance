@@ -78,7 +78,7 @@ const isMobileNavOpen = ref(false)
     <header class="navbar">
       <div class="navbar-inner">
         <div class="navbar-brand" @click="router.push('/')">
-          <span class="material-symbols-outlined brand-icon">account_balance</span>
+          <img src="@/assets/logo.png" alt="Naviance Logo" class="brand-icon-img" />
           <div class="brand-text">
             <span class="brand-name">Naviance</span>
             <span class="brand-tagline">Navigate Your Finance</span>
@@ -598,7 +598,7 @@ const isMobileNavOpen = ref(false)
       <div class="footer-inner">
         <div class="footer-brand">
           <div class="footer-logo">
-            <span class="material-symbols-outlined">account_balance</span>
+            <img src="@/assets/logo.png" alt="Naviance Logo" class="footer-logo-img" />
             <span class="footer-logo-text">Naviance</span>
           </div>
           <p class="footer-desc">Navigate Your Finance.<br/>Empowering your financial future through intelligent tracking.</p>
@@ -729,9 +729,14 @@ const isMobileNavOpen = ref(false)
 }
 .navbar-brand:hover { opacity: 0.8; }
 
-.brand-icon {
+.brand-icon, .brand-icon-img {
   font-size: 32px;
   color: var(--secondary-container);
+}
+.brand-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .brand-text {
@@ -1944,9 +1949,14 @@ const isMobileNavOpen = ref(false)
   gap: 10px;
   margin-bottom: 16px;
 }
-.footer-logo .material-symbols-outlined {
+.footer-logo .material-symbols-outlined, .footer-logo-img {
   font-size: 28px;
   color: rgba(255, 255, 255, 0.7);
+}
+.footer-logo-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 .footer-logo-text {
   font-size: 22px;

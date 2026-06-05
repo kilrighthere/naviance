@@ -6,6 +6,7 @@ import Sidebar from '@/components/sidebar.vue';
 import ChatBot from '@/components/chatBot.vue';
 import FormTransaksi from '@/components/formTransaksi.vue';
 import { CATEGORIES } from '@/types/transaksi';
+import LoadingScreen from '@/components/loading.vue';
 
 const authStore = useAuthStore();
 const transaksiStore = useTransaksiStore();
@@ -28,9 +29,13 @@ const categoriesMap = computed(() => {
   return map;
 });
 
+const isPageLoading = ref(true);
+
 const loadData = async (id: string) => {
   if (!id) return;
+  isPageLoading.value = true;
   await transaksiStore.fetchAll(id);
+  isPageLoading.value = false;
 };
 
 onMounted(() => {
@@ -79,6 +84,9 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
 
 <template>
   <div class="bg-background text-on-background flex h-screen overflow-hidden">
+    <!-- Loading Screen -->
+    <LoadingScreen :is-loading="isPageLoading" message="Memuat transaksi..." />
+
     <!-- Sidebar Component -->
     <Sidebar ref="sidebarRef" />
 

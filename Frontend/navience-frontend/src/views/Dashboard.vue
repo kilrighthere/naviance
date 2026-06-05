@@ -15,6 +15,7 @@ import Sidebar from '@/components/sidebar.vue';
 import ChatBot from '@/components/chatBot.vue';
 import FormTransaksi from '@/components/formTransaksi.vue';
 import ProfileDropdown from '@/components/profile.vue';
+import LoadingScreen from '@/components/loading.vue';
 
 const transaksiStore = useTransaksiStore();
 const authStore = useAuthStore();
@@ -264,13 +265,17 @@ const openFormTransaksi = () => {
 
 
 // ─── Data Loading ─────────────────────────────────
+const isPageLoading = ref(true);
+
 const loadData = async (id: string) => {
   if (!id) return;
+  isPageLoading.value = true;
   await Promise.all([
     transaksiStore.fetchAll(id),
     anggaranStore.fetchAll(id),
     targetStore.fetchTargetAktif(id)
   ]);
+  isPageLoading.value = false;
 };
 
 onMounted(() => {
@@ -288,6 +293,9 @@ watch(userID, (id) => {
 
 <template>
   <div class="bg-background text-on-background flex h-screen overflow-hidden">
+    <!-- Loading Screen -->
+    <LoadingScreen :is-loading="isPageLoading" message="Memuat dashboard..." />
+
     <!-- Sidebar Component -->
     <Sidebar ref="sidebarRef" />
 

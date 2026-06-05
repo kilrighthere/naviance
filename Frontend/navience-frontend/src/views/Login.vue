@@ -34,7 +34,7 @@ const handleLogin = async () => {
   <div class="auth-page">
     <!-- Logo / Branding -->
     <div class="auth-brand">
-      <span class="material-symbols-outlined brand-icon">account_balance</span>
+      <img src="@/assets/logo.png" alt="Naviance Logo" class="brand-icon-img" />
       <p class="brand-text">Navigate Your Finance</p>
     </div>
 
@@ -151,10 +151,15 @@ const handleLogin = async () => {
   z-index: 30;
 }
 
-.brand-icon {
+.brand-icon, .brand-icon-img {
   font-size: 36px;
   color: #fea619;
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.brand-icon-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
 }
 
 .brand-text {
