@@ -57,7 +57,7 @@ const handleRegist = async () => {
   <div class="auth-page">
     <!-- Logo / Branding -->
     <div class="auth-brand">
-      <img src="@/assets/logo.png" alt="Naviance Logo" class="brand-icon-img" />
+      <img src="/logo.png" alt="Naviance Logo" class="brand-icon-img" />
       <p class="brand-text">Navigate Your Finance</p>
     </div>
 

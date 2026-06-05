@@ -48,7 +48,7 @@ const props = withDefaults(
           </svg>
           <!-- Logo in center -->
           <img
-            src="@/assets/logo.png"
+            src="/logo.png"
             alt="Naviance"
             class="spinner-logo"
           />

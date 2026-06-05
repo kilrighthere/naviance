@@ -78,7 +78,7 @@ const isMobileNavOpen = ref(false)
     <header class="navbar">
       <div class="navbar-inner">
         <div class="navbar-brand" @click="router.push('/')">
-          <img src="@/assets/logo.png" alt="Naviance Logo" class="brand-icon-img" />
+          <img src="/logo.png" alt="Naviance Logo" class="brand-icon-img" />
           <div class="brand-text">
             <span class="brand-name">Naviance</span>
             <span class="brand-tagline">Navigate Your Finance</span>
@@ -598,7 +598,7 @@ const isMobileNavOpen = ref(false)
       <div class="footer-inner">
         <div class="footer-brand">
           <div class="footer-logo">
-            <img src="@/assets/logo.png" alt="Naviance Logo" class="footer-logo-img" />
+            <img src="/logo.png" alt="Naviance Logo" class="footer-logo-img" />
             <span class="footer-logo-text">Naviance</span>
           </div>
           <p class="footer-desc">Navigate Your Finance.<br/>Empowering your financial future through intelligent tracking.</p>
