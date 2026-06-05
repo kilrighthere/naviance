@@ -11,6 +11,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useTransaksiStore } from '@/stores/transaksi';
 import { useAnggaranStore } from '@/stores/anggaran';
 import { useTargetStore } from '@/stores/target';
+import { useAdaptiveStore } from '@/stores/adaptivePlanning';
+import { usePatternStore } from '@/stores/pattern';
 import Sidebar from '@/components/sidebar.vue';
 import ChatBot from '@/components/chatBot.vue';
 import FormTransaksi from '@/components/formTransaksi.vue';
@@ -21,6 +23,8 @@ const transaksiStore = useTransaksiStore();
 const authStore = useAuthStore();
 const anggaranStore = useAnggaranStore();
 const targetStore = useTargetStore();
+const adaptiveStore = useAdaptiveStore();
+const patternStore = usePatternStore();
 
 const userID = computed(() => authStore.user?.id ?? '');
 const userName = computed(() => authStore.user?.user_metadata?.nama_lengkap ?? 'User');
@@ -51,7 +55,6 @@ const totalSisaAnggaran = computed(() => {
     .filter(item => item.tanggal_transaksi.slice(0, 7) === periodeAktif.value)
     .filter(item => kategoriAktif.has(item.id_kategori))
     .reduce((sum, item) => sum + item.nominal, 0);
-
   return totalAnggaran - totalTerpakai;
 });
 
@@ -68,17 +71,54 @@ const progressTabungan = computed(() => {
   return Math.min(100, Math.max(0, percentage));
 });
 
-// ─── SVG Line Chart Data ───────────────────────────
+// ─── AI Insight text for the dashboard card ───────────────────────────────────
+
+const aiInsightText = computed(() => {
+  if (adaptiveStore.isLoading) return 'Menganalisis data keuangan Anda...';
+  if (adaptiveStore.storeError) return 'Tidak dapat memuat insight saat ini.';
+  if (!adaptiveStore.result) {
+    return `Alokasikan sisa anggaran Rp ${totalSisaAnggaran.value.toLocaleString('id-ID')} bulan ini untuk mencapai target 15% lebih cepat.`;
+  }
+
+  const pred = adaptiveStore.result.prediction;
+  const prob = (pred.prob_goal_achieved * 100).toFixed(1);
+
+  if (pred.on_track) {
+    return `Target Anda diprediksi akan tercapai dengan probabilitas ${prob}%. Pertahankan pola menabung ini!`;
+  }
+
+  const topRek = adaptiveStore.rekomendasiAktif[0];
+  if (topRek) {
+    return `Target berisiko tidak tercapai (${prob}%). Coba hemat di kategori ${topRek.kategori} sekitar Rp ${topRek.nominal.toLocaleString('id-ID')}/bulan.`;
+  }
+
+  return `Probabilitas target tercapai: ${prob}%. Pantau terus pengeluaran Anda.`;
+});
+
+const aiInsightIcon = computed(() => {
+  if (adaptiveStore.isLoading) return 'autorenew';
+  if (adaptiveStore.storeError) return 'error';
+  if (!adaptiveStore.result) return 'auto_awesome';
+  return adaptiveStore.result.prediction.on_track ? 'check_circle' : 'warning';
+});
+
+const aiInsightColor = computed(() => {
+  if (!adaptiveStore.result) return 'text-secondary-container';
+  return adaptiveStore.result.prediction.on_track
+    ? 'text-on-tertiary-container'
+    : 'text-error';
+});
+
+// ─── SVG Line Chart Data ───────────────────────────────────────────────────────
+
 const chartPeriod = ref('6bulan');
 
-// Build chart data from store
 const chartData = computed(() => {
   const apex = ringkasan6BulanApex.value;
   const categories = apex.categories;
   const incomeData = apex.series[0]?.data ?? [];
   const expenseData = apex.series[1]?.data ?? [];
 
-  // Find max value for Y-axis scaling
   const allValues = [...incomeData, ...expenseData];
   const maxVal = Math.max(...allValues, 1);
 
@@ -92,14 +132,7 @@ const chartData = computed(() => {
     const x = pointCount > 1 ? (i / (pointCount - 1)) * viewBoxWidth : viewBoxWidth / 2;
     const yInc = viewBoxHeight - (inc / maxVal) * (viewBoxHeight - 10);
     const yExp = viewBoxHeight - (exp / maxVal) * (viewBoxHeight - 10);
-    return {
-      month,
-      income: inc,
-      expense: exp,
-      x,
-      yInc,
-      yExp,
-    };
+    return { month, income: inc, expense: exp, x, yInc, yExp };
   });
 });
 
@@ -129,7 +162,8 @@ const expenseAreaPath = computed(() => {
   return `${linePart} L ${last?.x ?? 0},160 L ${first?.x ?? 0},160 Z`;
 });
 
-// Chart tooltip state
+// ─── Chart tooltip ────────────────────────────────────────────────────────────
+
 const chartAreaRef = ref<HTMLElement | null>(null);
 const svgWrapperRef = ref<SVGSVGElement | null>(null);
 const activeChartIndex = ref(-1);
@@ -164,8 +198,6 @@ const onChartMouseMove = (e: MouseEvent) => {
 
   const containerRect = el.getBoundingClientRect();
   const svgRect = svgEl.getBoundingClientRect();
-
-  // SVG offset relative to the chart area container
   const svgOffsetTop = svgRect.top - containerRect.top;
   const svgHeight = svgRect.height;
 
@@ -183,7 +215,6 @@ const onChartMouseMove = (e: MouseEvent) => {
     if (!data) return;
 
     const xPos = (data.x / 600) * width + padding;
-    // Y positions: map viewBox coordinates to actual SVG pixel height, then add SVG offset
     const yIncPos = (data.yInc / 160) * svgHeight + svgOffsetTop;
     const yExpPos = (data.yExp / 160) * svgHeight + svgOffsetTop;
 
@@ -212,15 +243,15 @@ const onChartMouseLeave = () => {
   tooltipStyle.value = { left: '0px', top: '0px', opacity: '0', transform: 'translate(-50%, -100%)' };
 };
 
-// ─── Recent transactions (latest 5) ───────────────
+// ─── Recent Transactions ──────────────────────────────────────────────────────
+
 const recentTransactions = computed(() => {
-  const sorted = [...transaksiStore.items].sort((a, b) =>
-    new Date(b.tanggal_transaksi).getTime() - new Date(a.tanggal_transaksi).getTime()
+  const sorted = [...transaksiStore.items].sort(
+    (a, b) => new Date(b.tanggal_transaksi).getTime() - new Date(a.tanggal_transaksi).getTime()
   );
   return sorted.slice(0, 5);
 });
 
-// Transaction icon mapping
 const getCategoryIcon = (item: typeof transaksiStore.items[0]) => {
   const name = (item.nama_transaksi ?? '').toLowerCase();
   if (name.includes('coffee') || name.includes('makan') || name.includes('starbucks') || name.includes('resto')) return 'restaurant';
@@ -250,11 +281,13 @@ const formatDate = (dateStr: string) => {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-// ─── Sidebar ref ──────────────────────────────────
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+
 const sidebarRef = ref<InstanceType<typeof Sidebar> | null>(null);
 const isSidebarMinimized = computed(() => sidebarRef.value?.isMinimized ?? false);
 
-// ─── Form Transaksi Modal ─────────────────────────
+// ─── Form Transaksi Modal ─────────────────────────────────────────────────────
+
 const showFormTransaksi = ref(false);
 
 const openFormTransaksi = () => {
@@ -262,9 +295,8 @@ const openFormTransaksi = () => {
   showFormTransaksi.value = true;
 };
 
+// ─── Data Loading ─────────────────────────────────────────────────────────────
 
-
-// ─── Data Loading ─────────────────────────────────
 const isPageLoading = ref(true);
 
 const loadData = async (id: string) => {
@@ -273,8 +305,13 @@ const loadData = async (id: string) => {
   await Promise.all([
     transaksiStore.fetchAll(id),
     anggaranStore.fetchAll(id),
-    targetStore.fetchTargetAktif(id)
+    targetStore.fetchTargetAktif(id),
+    patternStore.classify(),       // ← financial health classification
   ]);
+  // Fetch adaptive prediction after target is loaded
+  if (targetStore.selected) {
+    await adaptiveStore.predict();
+  }
   isPageLoading.value = false;
 };
 
@@ -289,6 +326,18 @@ watch(userID, (id) => {
     void loadData(id);
   }
 });
+
+// Re-fetch prediction when selected target changes on dashboard
+watch(
+  () => targetStore.selected,
+  async (newTarget) => {
+    if (newTarget) {
+      await adaptiveStore.predict();
+    } else {
+      adaptiveStore.reset();
+    }
+  }
+);
 </script>
 
 <template>
@@ -305,19 +354,20 @@ watch(userID, (id) => {
       :class="{ 'content-expanded': isSidebarMinimized }"
     >
       <!-- Top App Bar -->
-      <header class="flex justify-between items-center w-full px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10">
+      <header
+        class="flex justify-between items-center w-full px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10"
+      >
         <div class="flex items-center gap-4">
           <h2 class="font-headline-md text-headline-md text-primary">Overview</h2>
         </div>
         <div class="flex items-center gap-6 text-on-surface-variant">
-
-          <!-- Profile Dropdown Component -->
           <ProfileDropdown />
         </div>
       </header>
 
       <!-- Scrollable Dashboard Canvas -->
       <main class="flex-1 overflow-y-auto p-margin-desktop space-y-10">
+
         <!-- Page Header -->
         <section class="flex justify-between items-end flex-wrap gap-4">
           <div>
@@ -348,10 +398,92 @@ watch(userID, (id) => {
           </div>
         </section>
 
+        <!-- ── AI Financial Health Banner ────────────────────────────── -->
+        <section id="banner-financial-health">
+          <!-- Loading skeleton -->
+          <div
+            v-if="patternStore.isLoading"
+            class="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-4 flex items-center gap-4 animate-pulse"
+          >
+            <div class="w-10 h-10 rounded-full bg-surface-variant shrink-0"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-3 bg-surface-variant rounded w-32"></div>
+              <div class="h-2 bg-surface-variant rounded w-56"></div>
+            </div>
+          </div>
+
+          <!-- Result -->
+          <div
+            v-else-if="patternStore.result && patternStore.config"
+            class="rounded-2xl border p-4 flex flex-col sm:flex-row sm:items-center gap-4 transition-all"
+            :class="[patternStore.config.colorBg, patternStore.config.colorBorder]"
+          >
+            <!-- Left: icon + label + description -->
+            <div class="flex items-start gap-3 flex-1 min-w-0">
+              <div
+                class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-surface/60"
+                :class="patternStore.config.colorText"
+              >
+                <span
+                  class="material-symbols-outlined text-[22px]"
+                  style="font-variation-settings: 'FILL' 1"
+                >{{ patternStore.config.icon }}</span>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                    AI · Kondisi Keuangan
+                  </p>
+                  <!-- Classification badge -->
+                  <span
+                    class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full font-semibold"
+                    :class="[patternStore.config.colorText, patternStore.config.colorBg, 'border', patternStore.config.colorBorder]"
+                  >
+                    {{ patternStore.config.labelId }}
+                  </span>
+                </div>
+                <p class="font-body-md text-body-md text-on-surface-variant mt-0.5 text-sm">
+                  {{ patternStore.config.description }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Right: probability mini-bars + confidence -->
+            <div class="shrink-0 flex flex-col gap-1.5 min-w-[160px]">
+              <div
+                v-for="bar in patternStore.probabilityBars"
+                :key="bar.key"
+                class="flex items-center gap-2"
+              >
+                <span class="font-label-sm text-label-sm text-on-surface-variant w-14 text-right">
+                  {{ bar.labelId }}
+                </span>
+                <div class="flex-1 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all duration-700"
+                    :class="bar.bar"
+                    :style="{ width: bar.pct + '%' }"
+                  ></div>
+                </div>
+                <span
+                  class="font-label-sm text-label-sm w-8 text-left"
+                  :class="patternStore.config.colorText"
+                >{{ bar.pct }}%</span>
+              </div>
+              <p class="font-label-sm text-label-sm text-outline text-right mt-1">
+                Confidence {{ patternStore.confidenceFormatted }}
+              </p>
+            </div>
+          </div>
+        </section>
+
         <!-- Top Row: Metrics Grid -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
           <!-- Card: Total Pemasukan -->
-          <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col justify-between hover:shadow-md transition-shadow" id="card-pemasukan">
+          <div
+            class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col justify-between hover:shadow-md transition-shadow"
+            id="card-pemasukan"
+          >
             <div class="flex justify-between items-start mb-4">
               <span class="font-label-md text-label-md text-on-surface-variant">Total Pemasukan</span>
               <div class="w-10 h-10 rounded-full bg-tertiary-fixed/20 flex items-center justify-center text-on-tertiary-fixed">
@@ -370,7 +502,10 @@ watch(userID, (id) => {
           </div>
 
           <!-- Card: Total Pengeluaran -->
-          <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col justify-between hover:shadow-md transition-shadow" id="card-pengeluaran">
+          <div
+            class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col justify-between hover:shadow-md transition-shadow"
+            id="card-pengeluaran"
+          >
             <div class="flex justify-between items-start mb-4">
               <span class="font-label-md text-label-md text-on-surface-variant">Total Pengeluaran</span>
               <div class="w-10 h-10 rounded-full bg-error-container/50 flex items-center justify-center text-error">
@@ -389,8 +524,10 @@ watch(userID, (id) => {
           </div>
 
           <!-- Card: Sisa Anggaran -->
-          <div class="bg-primary text-on-primary rounded-2xl shadow-sm p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden" id="card-sisa-anggaran">
-            <!-- Decorative abstract shape -->
+          <div
+            class="bg-primary text-on-primary rounded-2xl shadow-sm p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden"
+            id="card-sisa-anggaran"
+          >
             <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary-fixed/10 rounded-full blur-2xl"></div>
             <div class="flex justify-between items-start mb-4 relative z-10">
               <span class="font-label-md text-label-md text-primary-fixed">Sisa Anggaran</span>
@@ -402,8 +539,18 @@ watch(userID, (id) => {
               <h3 class="font-headline-md text-headline-md">
                 Rp {{ totalSisaAnggaran.toLocaleString('id-ID') }}
               </h3>
-              <p class="font-label-sm text-label-sm text-primary-fixed mt-2">
-                Aman untuk dialokasikan
+              <p
+                class="font-label-sm text-label-sm mt-2 flex items-center gap-1"
+                :class="patternStore.result ? patternStore.config?.colorText ?? 'text-primary-fixed' : 'text-primary-fixed'"
+              >
+                <span class="material-symbols-outlined text-[16px]">
+                  {{ patternStore.result ? patternStore.config?.icon ?? 'account_balance_wallet' : 'account_balance_wallet' }}
+                </span>
+                {{
+                  patternStore.result
+                    ? `Kondisi: ${patternStore.config?.labelId}`
+                    : 'Aman untuk dialokasikan'
+                }}
               </p>
             </div>
           </div>
@@ -411,8 +558,12 @@ watch(userID, (id) => {
 
         <!-- Middle Section: Bento Grid -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+
           <!-- Chart Area: Ringkasan Bulanan (Span 2 cols) -->
-          <div class="lg:col-span-2 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col chart-container" id="chart-ringkasan">
+          <div
+            class="lg:col-span-2 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col chart-container"
+            id="chart-ringkasan"
+          >
             <div class="flex justify-between items-center mb-6">
               <h3 class="font-headline-md text-headline-md text-on-background">Ringkasan Bulanan</h3>
               <select
@@ -440,7 +591,12 @@ watch(userID, (id) => {
               </div>
 
               <div class="relative z-10 w-full h-full flex flex-col justify-end">
-                <svg ref="svgWrapperRef" class="w-full h-48 overflow-visible" viewBox="0 0 600 160" preserveAspectRatio="none">
+                <svg
+                  ref="svgWrapperRef"
+                  class="w-full h-48 overflow-visible"
+                  viewBox="0 0 600 160"
+                  preserveAspectRatio="none"
+                >
                   <defs>
                     <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stop-color="#00a472" stop-opacity="0.2" />
@@ -451,10 +607,8 @@ watch(userID, (id) => {
                       <stop offset="100%" stop-color="#ba1a1a" stop-opacity="0" />
                     </linearGradient>
                   </defs>
-                  <!-- Income line + area -->
                   <path :d="incomePath" fill="none" stroke="#00a472" stroke-width="3" stroke-linecap="round" />
                   <path :d="incomeAreaPath" :fill="'url(#incomeGradient)'" />
-                  <!-- Expense line + area -->
                   <path :d="expensePath" fill="none" stroke="#ba1a1a" stroke-width="3" stroke-linecap="round" />
                   <path :d="expenseAreaPath" :fill="'url(#expenseGradient)'" />
                 </svg>
@@ -474,8 +628,13 @@ watch(userID, (id) => {
               <div class="chart-guide-line" :style="guideStyle"></div>
               <div class="chart-point" style="border-color: #00a472;" :style="incomePointStyle"></div>
               <div class="chart-point" style="border-color: #ba1a1a;" :style="expensePointStyle"></div>
-              <div class="chart-tooltip glass-ai rounded-xl p-3 shadow-lg min-w-[140px]" :style="tooltipStyle">
-                <p class="font-label-md text-label-md text-[#1E293B] mb-2 border-b border-outline-variant/20 pb-1">{{ tooltipData.month }}</p>
+              <div
+                class="chart-tooltip glass-ai rounded-xl p-3 shadow-lg min-w-[140px]"
+                :style="tooltipStyle"
+              >
+                <p class="font-label-md text-label-md text-[#1E293B] mb-2 border-b border-outline-variant/20 pb-1">
+                  {{ tooltipData.month }}
+                </p>
                 <div class="space-y-1">
                   <div class="flex items-center justify-between gap-3">
                     <div class="flex items-center gap-1.5">
@@ -510,40 +669,74 @@ watch(userID, (id) => {
 
           <!-- Widget: Target Tabungan -->
           <div class="lg:col-span-1 flex flex-col gap-gutter">
-            <!-- Goal Card -->
-            <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex-1" id="card-target-tabungan">
+            <div
+              class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex-1"
+              id="card-target-tabungan"
+            >
               <div class="flex justify-between items-center mb-6">
                 <h3 class="font-headline-md text-headline-md text-on-background">Target Tabungan</h3>
-                <RouterLink :to="`/target/${userID}`" class="text-secondary-container hover:text-secondary transition-colors" id="btn-add-goal">
-                  <span class="material-symbols-outlined">{{ targetStore.selected ? 'arrow_forward' : 'add_circle' }}</span>
+                <RouterLink
+                  :to="`/target/${userID}`"
+                  class="text-secondary-container hover:text-secondary transition-colors"
+                  id="btn-add-goal"
+                >
+                  <span class="material-symbols-outlined">{{
+                    targetStore.selected ? 'arrow_forward' : 'add_circle'
+                  }}</span>
                 </RouterLink>
               </div>
+
               <!-- Progress Item -->
               <div v-if="targetStore.selected" class="space-y-4">
                 <div class="flex justify-between items-end">
                   <div>
-                    <h4 class="font-label-md text-label-md text-on-background">{{ targetStore.selected.nama_target }}</h4>
-                    <p class="font-label-sm text-label-sm text-on-surface-variant">Rp {{ totalTabungan.toLocaleString('id-ID') }} / Rp {{ targetStore.selected.nominal_target.toLocaleString('id-ID') }}</p>
+                    <h4 class="font-label-md text-label-md text-on-background">
+                      {{ targetStore.selected.nama_target }}
+                    </h4>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">
+                      Rp {{ totalTabungan.toLocaleString('id-ID') }} / Rp
+                      {{ targetStore.selected.nominal_target.toLocaleString('id-ID') }}
+                    </p>
                   </div>
-                  <span class="font-label-md text-label-md text-primary">{{ progressTabungan.toFixed(1) }}%</span>
+                  <span class="font-label-md text-label-md text-primary">
+                    {{ progressTabungan.toFixed(1) }}%
+                  </span>
                 </div>
                 <!-- Progress Bar -->
                 <div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-secondary-container to-secondary rounded-full" :style="{ width: progressTabungan + '%' }"></div>
+                  <div
+                    class="h-full bg-gradient-to-r from-secondary-container to-secondary rounded-full"
+                    :style="{ width: progressTabungan + '%' }"
+                  ></div>
                 </div>
               </div>
+
+              <!-- Empty state -->
               <div v-else class="py-4 text-center">
-                <p class="font-body-md text-body-md text-on-surface-variant mb-2">Belum ada target aktif</p>
-                <RouterLink :to="`/target/${userID}`" class="text-secondary font-label-md text-label-md hover:underline">Buat Target Sekarang</RouterLink>
+                <p class="font-body-md text-body-md text-on-surface-variant mb-2">
+                  Belum ada target aktif
+                </p>
+                <RouterLink
+                  :to="`/target/${userID}`"
+                  class="text-secondary font-label-md text-label-md hover:underline"
+                >Buat Target Sekarang</RouterLink>
               </div>
 
-              <!-- AI Insight Card -->
-              <div class="mt-8 p-4 bg-surface-container rounded-xl flex items-start gap-3 border border-outline-variant/10">
-                <span class="material-symbols-outlined text-secondary-container text-xl">auto_awesome</span>
+              <!-- ── AI Insight Card (now powered by adaptive store) ── -->
+              <div
+                class="mt-8 p-4 bg-surface-container rounded-xl flex items-start gap-3 border border-outline-variant/10"
+              >
+                <span
+                  class="material-symbols-outlined text-xl"
+                  :class="[aiInsightColor, adaptiveStore.isLoading ? 'animate-spin' : '']"
+                  style="font-variation-settings: 'FILL' 1"
+                >
+                  {{ aiInsightIcon }}
+                </span>
                 <div>
                   <p class="font-label-md text-label-md text-on-background mb-1">AI Insight</p>
                   <p class="font-body-md text-body-md text-on-surface-variant text-sm">
-                    Alokasikan sisa anggaran Rp {{ totalSisaAnggaran.toLocaleString('id-ID') }} bulan ini untuk mencapai target 15% lebih cepat.
+                    {{ aiInsightText }}
                   </p>
                 </div>
               </div>
@@ -552,15 +745,16 @@ watch(userID, (id) => {
         </section>
 
         <!-- Recent Transactions -->
-        <section class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6" id="section-transaksi-terkini">
+        <section
+          class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6"
+          id="section-transaksi-terkini"
+        >
           <div class="flex justify-between items-center mb-6">
             <h3 class="font-headline-md text-headline-md text-on-background">Transaksi Terkini</h3>
             <RouterLink
               :to="`/transaksi/${userID}`"
               class="text-primary font-label-md text-label-md hover:underline"
-            >
-              Lihat Semua
-            </RouterLink>
+            >Lihat Semua</RouterLink>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left">
@@ -601,8 +795,12 @@ watch(userID, (id) => {
                   <td class="py-4 font-body-md text-body-md text-on-surface-variant">
                     {{ formatDate(trx.tanggal_transaksi) }}
                   </td>
-                  <td class="py-4 font-label-md text-label-md text-right" :class="trx.jenis_transaksi === 'pemasukan' ? 'text-on-tertiary-container' : 'text-error'">
-                    {{ trx.jenis_transaksi === 'pemasukan' ? '+' : '-' }} Rp {{ trx.nominal.toLocaleString('id-ID') }}
+                  <td
+                    class="py-4 font-label-md text-label-md text-right"
+                    :class="trx.jenis_transaksi === 'pemasukan' ? 'text-on-tertiary-container' : 'text-error'"
+                  >
+                    {{ trx.jenis_transaksi === 'pemasukan' ? '+' : '-' }} Rp
+                    {{ trx.nominal.toLocaleString('id-ID') }}
                   </td>
                 </tr>
               </tbody>
@@ -618,9 +816,6 @@ watch(userID, (id) => {
     </div>
 
     <!-- Transaction Form Modal -->
-    <FormTransaksi
-      :show="showFormTransaksi"
-      @update:show="showFormTransaksi = $event"
-    />
+    <FormTransaksi :show="showFormTransaksi" @update:show="showFormTransaksi = $event" />
   </div>
 </template>
