@@ -54,9 +54,9 @@ async function handleSend(): Promise<void> {
   await chatbotStore.sendMessage(text)
 }
 
+// FIX: kirim prompt ke bot, tapi tampilkan title di bubble user
 async function handleSuggestionClick(prompt: string, title: string): Promise<void> {
   if (isLoading.value) return
-  // Show the title as the user message
   userInput.value = ''
   await chatbotStore.sendMessage(prompt)
 }
@@ -232,8 +232,6 @@ function renderMarkdown(text: string): string {
               v-if="isEmpty"
               class="max-w-4xl mx-auto flex flex-col items-center py-12 px-4"
             >
-              <!-- Animated Bot Avatar -->
-              <!-- Removed Avatar here as requested -->
               <div class="text-center mb-10">
                 <h2
                   class="font-headline-lg text-headline-lg text-primary-container mb-2"
@@ -271,8 +269,6 @@ function renderMarkdown(text: string): string {
                   </div>
                 </button>
               </div>
-
-              <!-- Info Banner Removed -->
             </div>
 
             <!-- ===== CHAT MESSAGES ===== -->
