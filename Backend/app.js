@@ -4,6 +4,7 @@ import transactionRoutes from "./routes/transactionRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import aiTransactionRoutes from "./routes/aiTransactionRoutes.js";
 import patternPredictRoutes from "./routes/patternPredictRoutes.js";
+import adaptivePlanningRoutes from "./routes/adaptivePlanningRoutes.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -23,6 +24,8 @@ app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/chatbot", aiTransactionRoutes);
 app.use("/api/v1/pattern", patternPredictRoutes);
+app.use("/api/v1/adaptive", adaptivePlanningRoutes);
+
 
 app.use((err, _req, res, _next) => {
     console.error(err);

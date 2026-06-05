@@ -9,8 +9,7 @@ import { predictSpendingPattern } from "../services/mlService.js";
 export const predictPattern = async (req,res,next) => {
     try {
         const { id: userId } = req.user;
-        const accessToken =
-            req.accessToken;
+        const accessToken = req.accessToken;
         const trxResult =
             await getTransactionData(
                 accessToken,
