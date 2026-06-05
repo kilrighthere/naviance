@@ -104,7 +104,16 @@ export const useTransaksiStore = defineStore('transaksi', () => {
 
     const sortedItems = computed(() => {
         const list = [...filteredItems.value];
-        if (!sortNominal.value) return list;
+        if (!sortNominal.value) {
+            return list.sort((a, b) => {
+                const dateDiff = new Date(b.tanggal_transaksi).getTime() - new Date(a.tanggal_transaksi).getTime();
+                if (dateDiff !== 0) return dateDiff;
+                if (a.created_at && b.created_at) {
+                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                }
+                return 0;
+            });
+        }
         return list.sort((a, b) =>
             sortNominal.value === 'asc' ? a.nominal - b.nominal : b.nominal - a.nominal
         );

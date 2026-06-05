@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useTransaksiStore } from '@/stores/transaksi';
+import { useTargetStore } from '@/stores/target';
 import Sidebar from '@/components/sidebar.vue';
 import ChatBot from '@/components/chatBot.vue';
 import FormTransaksi from '@/components/formTransaksi.vue';
@@ -11,6 +12,7 @@ import ProfileDropdown from '@/components/profile.vue';
 
 const authStore = useAuthStore();
 const transaksiStore = useTransaksiStore();
+const targetStore = useTargetStore();
 
 const userID = computed(() => authStore.user?.id ?? '');
 
@@ -32,11 +34,48 @@ const categoriesMap = computed(() => {
 
 const isPageLoading = ref(true);
 
+const currentPage = ref(1);
+const itemsPerPage = 15;
+
+const paginatedItems = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return transaksiStore.sortedItems.slice(start, end);
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(transaksiStore.sortedItems.length / itemsPerPage) || 1;
+});
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+watch(
+  () => [transaksiStore.searchQuery, transaksiStore.filterCategory, transaksiStore.filterTimeRange, transaksiStore.sortNominal],
+  () => {
+    currentPage.value = 1;
+  }
+);
+
 const loadData = async (id: string) => {
   if (!id) return;
   isPageLoading.value = true;
-  await transaksiStore.fetchAll(id);
+  await Promise.all([
+    transaksiStore.fetchAll(id),
+    targetStore.fetchAll(id)
+  ]);
   isPageLoading.value = false;
+};
+
+const getTargetName = (idTarget: string | null) => {
+  if (!idTarget) return '';
+  const target = targetStore.items.find(t => t.id_target === idTarget);
+  return target ? target.nama_target : 'Target Dihapus';
 };
 
 onMounted(() => {
@@ -194,7 +233,7 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
               </tr>
               
               <tr 
-                v-for="trx in transaksiStore.sortedItems" 
+                v-for="trx in paginatedItems" 
                 :key="trx.id_transaksi" 
                 class="border-b border-surface-variant/50 hover:bg-surface-container-lowest/80 transition-all duration-150 group"
                 :class="trx.jenis_transaksi === 'pemasukan' ? 'hover:shadow-[inset_4px_0_0_0_#00a472]' : 'hover:shadow-[inset_4px_0_0_0_#1e293b]'"
@@ -212,7 +251,10 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
                     </div>
                     <div>
                       <div class="text-on-surface font-medium">{{ trx.nama_transaksi ?? trx.nama_toko ?? 'Transaksi' }}</div>
-                      <div class="text-label-sm font-label-sm text-on-surface-variant/70">{{ trx.deskripsi ?? (trx.nama_toko ? 'Toko' : 'Detail') }}</div>
+                      <div class="text-label-sm font-label-sm text-on-surface-variant/70 flex items-center gap-1.5 flex-wrap mt-0.5">
+                        <span v-if="trx.jenis_transaksi === 'tabungan'" class="bg-secondary/10 text-secondary px-1.5 py-0 rounded text-[11px] font-medium border border-secondary/20">Target: {{ getTargetName(trx.id_target) }}</span>
+                        <span v-if="trx.jenis_transaksi !== 'tabungan'">{{ trx.deskripsi ?? (trx.nama_toko ? 'Toko' : 'Detail') }}</span>
+                      </div>
                     </div>
                   </div>
                 </td>
@@ -238,13 +280,31 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
           </table>
           
           <!-- Pagination Control -->
-          <div class="px-6 py-4 border-t border-surface-variant bg-surface-container-lowest flex items-center justify-between">
-            <span class="text-label-sm font-label-sm text-on-surface-variant">
-              Total {{ transaksiStore.sortedItems.length }} transaksi
+          <div v-if="transaksiStore.sortedItems.length > 0" class="px-6 py-4 border-t border-surface-variant bg-surface-container-lowest flex items-center justify-between">
+            <span class="text-label-sm font-label-sm text-on-surface-variant hidden sm:inline">
+              Menampilkan {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, transaksiStore.sortedItems.length) }} dari {{ transaksiStore.sortedItems.length }} transaksi
             </span>
-            <div class="flex gap-2">
-              <button class="p-1 rounded hover:bg-surface-container-low text-on-surface-variant disabled:opacity-50"><span class="material-symbols-outlined">chevron_left</span></button>
-              <button class="p-1 rounded hover:bg-surface-container-low text-on-surface"><span class="material-symbols-outlined">chevron_right</span></button>
+            <span class="text-label-sm font-label-sm text-on-surface-variant sm:hidden">
+              Total: {{ transaksiStore.sortedItems.length }}
+            </span>
+            <div class="flex items-center gap-4">
+              <span class="text-label-sm font-label-sm text-on-surface-variant">Halaman {{ currentPage }} dari {{ totalPages }}</span>
+              <div class="flex gap-2">
+                <button 
+                  @click="prevPage" 
+                  :disabled="currentPage === 1"
+                  class="p-1 rounded hover:bg-surface-container-low text-on-surface-variant disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <button 
+                  @click="nextPage" 
+                  :disabled="currentPage === totalPages"
+                  class="p-1 rounded hover:bg-surface-container-low text-on-surface disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

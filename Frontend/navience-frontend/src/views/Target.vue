@@ -24,21 +24,22 @@ const transaksiStore = useTransaksiStore();
 
 // ─── Data Loading ─────────────────────────────────────────────────────────────
 
-const loadData = async () => {
-  if (!authStore.user) return;
-
-  await Promise.all([
-    targetStore.fetchTargetAktif(authStore.user.id),
-    transaksiStore.fetchAll(authStore.user.id),
-  ]);
+onMounted(async () => {
+  if (authStore.user) {
+    try {
+      await targetStore.fetchAll(authStore.user.id);
+      await targetStore.fetchTargetAktif(authStore.user.id);
+      await transaksiStore.fetchAll(authStore.user.id);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   // Only call adaptive predict when there is an active target
   if (targetStore.selected) {
     await adaptiveStore.predict();
   }
-};
-
-onMounted(loadData);
+});
 
 // Re-run prediction whenever the selected target changes (e.g. after create)
 watch(
@@ -79,9 +80,22 @@ const isSidebarMinimized = computed(() => sidebarRef.value?.isMinimized ?? false
 // ─── Add Target Modal ─────────────────────────────────────────────────────────
 
 const isAddTargetModalOpen = ref(false);
+const initialTargetData = ref<{ nama_target: string; nominal_target: number; deadline: string } | null>(null);
 
 const openAddTargetModal = () => {
+  initialTargetData.value = null;
   isAddTargetModalOpen.value = true;
+};
+
+const openEditTargetModal = () => {
+  if (targetStore.selected) {
+    initialTargetData.value = {
+      nama_target: targetStore.selected.nama_target,
+      nominal_target: targetStore.selected.nominal_target,
+      deadline: targetStore.selected.deadline,
+    };
+    isAddTargetModalOpen.value = true;
+  }
 };
 
 const closeAddTargetModal = () => {
@@ -94,8 +108,41 @@ const handleSaveTarget = async (data: {
   deadline: string;
 }) => {
   if (authStore.user) {
-    await targetStore.createTarget(authStore.user.id, data);
-    // Prediction is triggered by the watcher above after selected changes
+    if (initialTargetData.value && targetStore.selected) {
+      await targetStore.updateTarget(authStore.user.id, targetStore.selected.id_target, {
+        ...data,
+        status: targetStore.selected.status
+      });
+    } else {
+      await targetStore.createTarget(authStore.user.id, {
+        ...data,
+        status: 'on going'
+      });
+    }
+  }
+};
+
+const riwayatTargets = computed(() => {
+  return targetStore.items.filter(t => t.status === 'finished');
+});
+
+const selesaikanTarget = async () => {
+  if (authStore.user && targetStore.selected) {
+    if (confirm("Selamat! Target Anda telah tercapai. Apakah Anda ingin menyelesaikannya sekarang?")) {
+      try {
+        await targetStore.updateTarget(authStore.user.id, targetStore.selected.id_target, {
+          nama_target: targetStore.selected.nama_target,
+          nominal_target: targetStore.selected.nominal_target,
+          deadline: targetStore.selected.deadline,
+          status: 'finished'
+        });
+        if (targetStore.storeError) {
+          alert("Gagal menyelesaikan target: " + targetStore.storeError);
+        }
+      } catch (error: any) {
+        alert("Gagal menyelesaikan target: " + (targetStore.storeError || error.message));
+      }
+    }
   }
 };
 
@@ -177,10 +224,21 @@ const probProgressWidth = computed(() => {
                     Rp {{ Number(targetStore.selected.nominal_target).toLocaleString('id-ID') }}
                   </p>
                 </div>
-                <span
-                  class="bg-secondary-container text-black font-label-sm text-label-sm px-3 py-1.5 rounded-full uppercase tracking-wider"
-                  >Active</span
-                >
+                <div class="flex items-center gap-2">
+                  <button
+                    v-if="progressTabungan >= 100"
+                    @click="selesaikanTarget"
+                    class="flex items-center gap-2 px-4 py-2 bg-[#22c55e] text-white rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity shadow-sm"
+                  >
+                    <span class="material-symbols-outlined text-sm">check_circle</span> Selesaikan Target
+                  </button>
+                  <button
+                    @click="openEditTargetModal"
+                    class="flex items-center gap-2 px-4 py-2 bg-secondary-container text-on-secondary-container rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity"
+                  >
+                    <span class="material-symbols-outlined text-sm">edit</span> Edit Target
+                  </button>
+                </div>
               </div>
 
               <div class="mt-auto">
@@ -437,7 +495,29 @@ const probProgressWidth = computed(() => {
           <h3 class="font-headline-md text-headline-md text-primary-container mb-6">
             Riwayat Target &amp; Proyeksi
           </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-if="riwayatTargets.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div
+              v-for="target in riwayatTargets" :key="target.id_target"
+              class="bg-surface-container-lowest border border-outline-variant/30 shadow-[0_4px_12px_rgba(30,41,59,0.05)] rounded-2xl p-5 flex flex-col min-h-[160px]"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-headline-sm text-primary">{{ target.nama_target }}</h4>
+                <span class="bg-[#dcfce7] text-[#15803d] font-label-sm text-xs px-2 py-1 rounded-full flex items-center gap-1 font-semibold">
+                  <span class="material-symbols-outlined text-[12px]">check</span> Selesai
+                </span>
+              </div>
+              <p class="font-body-md text-on-surface-variant mb-4 font-medium">
+                Rp {{ Number(target.nominal_target).toLocaleString('id-ID') }}
+              </p>
+              <div class="mt-auto pt-4 border-t border-outline-variant/20">
+                <p class="font-label-sm text-on-surface-variant flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">event_available</span>
+                  Tercapai sebelum: {{ new Date(target.deadline).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div
               class="bg-surface/50 border border-dashed border-outline-variant/50 rounded-2xl p-5 flex items-center justify-center min-h-[160px]"
             >
@@ -455,6 +535,7 @@ const probProgressWidth = computed(() => {
       <ChatBot id="btn-ai-chatbot" />
       <AddTargetModal
         :isOpen="isAddTargetModalOpen"
+        :initialData="initialTargetData"
         @close="closeAddTargetModal"
         @save="handleSaveTarget"
       />

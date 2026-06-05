@@ -31,9 +31,9 @@ const isTabungan = computed(() => transaksiStore.payload.jenis_transaksi === 'ta
 // ID kategori "tabungan" dari CATEGORIES
 const TABUNGAN_KATEGORI_ID = '83a23757-6790-487c-9868-c8e39453ad28';
 
-// Target yang masih aktif (status on going)
-const activeTargets = computed(() => {
-  return targetStore.items.filter(t => t.status === 'on going');
+// Target yang bisa dipilih (aktif, ATAU target yang sedang diedit)
+const selectableTargets = computed(() => {
+  return targetStore.items.filter(t => t.status === 'on going' || t.id_target === transaksiStore.payload.id_target);
 });
 
 // Fetch targets setiap kali modal dibuka
@@ -58,8 +58,8 @@ watch(isTabungan, (val) => {
     transaksiStore.payload.nama_toko = null;
     transaksiStore.payload.deskripsi = 'Setoran tabungan ke target';
     // Auto-select target aktif pertama jika belum ada yang dipilih
-    if (!transaksiStore.payload.id_target && activeTargets.value.length > 0) {
-      transaksiStore.payload.id_target = activeTargets.value[0]?.id_target ?? null;
+    if (!transaksiStore.payload.id_target && selectableTargets.value.length > 0) {
+      transaksiStore.payload.id_target = selectableTargets.value[0]?.id_target ?? null;
     }
   } else {
     transaksiStore.payload.id_target = null;
@@ -68,6 +68,19 @@ watch(isTabungan, (val) => {
 
 const formatCurrency = (val: number) => {
   return val.toLocaleString('id-ID');
+};
+
+const formattedNominal = computed(() => {
+  const val = transaksiStore.payload.nominal;
+  return val && val > 0 ? val.toLocaleString('id-ID') : '';
+});
+
+const onNominalInput = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const raw = target.value.replace(/\D/g, '');
+  const num = Number(raw) || 0;
+  transaksiStore.payload.nominal = num;
+  target.value = num > 0 ? num.toLocaleString('id-ID') : '';
 };
 
 const close = () => {
@@ -92,10 +105,10 @@ const handleSave = async () => {
 
     // Guard: harus ada target yang dipilih
     if (!finalPayload.id_target) {
-      if (activeTargets.value.length > 0) {
-        finalPayload.id_target = activeTargets.value[0]?.id_target ?? null;
+      if (selectableTargets.value.length > 0) {
+        finalPayload.id_target = selectableTargets.value[0]?.id_target ?? null;
       } else {
-        alert('Tidak ada target aktif. Buat target terlebih dahulu di halaman Target.');
+        alert('Tidak ada target yang tersedia. Buat target terlebih dahulu di halaman Target.');
         return;
       }
     }
@@ -176,18 +189,18 @@ const handleDelete = async () => {
           <template v-if="isTabungan">
             <!-- Target Aktif Selection -->
             <div class="space-y-2">
-              <label class="font-label-md text-label-md text-on-surface-variant px-1">Target Aktif</label>
+              <label class="font-label-md text-label-md text-on-surface-variant px-1">Pilihan Target</label>
 
               <!-- Tidak ada target aktif -->
-              <div v-if="activeTargets.length === 0" class="p-4 rounded-xl bg-error-container/30 border border-error/20 flex items-center gap-3">
+              <div v-if="selectableTargets.length === 0" class="p-4 rounded-xl bg-error-container/30 border border-error/20 flex items-center gap-3">
                 <span class="material-symbols-outlined text-error">warning</span>
-                <p class="font-label-sm text-on-error-container">Tidak ada target aktif. Buat target di halaman Target terlebih dahulu.</p>
+                <p class="font-label-sm text-on-error-container">Tidak ada target yang tersedia. Buat target di halaman Target terlebih dahulu.</p>
               </div>
 
               <!-- Daftar target aktif -->
               <div v-else class="space-y-2">
                 <label
-                  v-for="target in activeTargets"
+                  v-for="target in selectableTargets"
                   :key="target.id_target"
                   class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all"
                   :class="transaksiStore.payload.id_target === target.id_target
@@ -239,7 +252,7 @@ const handleDelete = async () => {
               <label class="font-label-md text-label-md text-on-surface-variant px-1">Nominal Setoran</label>
               <div class="relative">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 font-label-md text-on-surface-variant">Rp</span>
-                <input class="w-full pl-12 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-headline-md text-headline-md" placeholder="0" type="number" v-model.number="transaksiStore.payload.nominal" required />
+                <input :value="formattedNominal" @input="onNominalInput" class="w-full pl-12 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-headline-md text-headline-md" placeholder="0" type="text" required />
               </div>
             </div>
 
@@ -256,7 +269,7 @@ const handleDelete = async () => {
               <label class="font-label-md text-label-md text-on-surface-variant px-1">Nominal</label>
               <div class="relative">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 font-label-md text-on-surface-variant">Rp</span>
-                <input class="w-full pl-12 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-headline-md text-headline-md" placeholder="0" type="number" v-model.number="transaksiStore.payload.nominal" required />
+                <input :value="formattedNominal" @input="onNominalInput" class="w-full pl-12 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-headline-md text-headline-md" placeholder="0" type="text" required />
               </div>
             </div>
 
@@ -318,7 +331,7 @@ const handleDelete = async () => {
             <button
               class="px-6 py-2.5 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container/90 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
               type="submit"
-              :disabled="transaksiStore.isLoading || (isTabungan && activeTargets.length === 0)"
+              :disabled="transaksiStore.isLoading || (isTabungan && selectableTargets.length === 0)"
             >
               <span v-if="transaksiStore.isLoading" class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
               Simpan

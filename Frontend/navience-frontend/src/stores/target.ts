@@ -198,6 +198,13 @@ export const useTargetStore = defineStore('target', () => {
                     item.id_target === data.id_target ? data : item
                 );
                 items.value = nextItems;
+                if (selected.value && selected.value.id_target === data.id_target) {
+                    if (data.status === 'finished') {
+                        selected.value = null;
+                    } else {
+                        selected.value = data;
+                    }
+                }
             }
         } catch (error) {
             if (!storeError.value && error instanceof Error) {

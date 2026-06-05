@@ -302,17 +302,22 @@ const isPageLoading = ref(true);
 const loadData = async (id: string) => {
   if (!id) return;
   isPageLoading.value = true;
-  await Promise.all([
-    transaksiStore.fetchAll(id),
-    anggaranStore.fetchAll(id),
-    targetStore.fetchTargetAktif(id),
-    patternStore.classify(),       // ← financial health classification
-  ]);
-  // Fetch adaptive prediction after target is loaded
-  if (targetStore.selected) {
-    await adaptiveStore.predict();
+  try {
+    await Promise.all([
+      transaksiStore.fetchAll(id),
+      anggaranStore.fetchAll(id),
+      targetStore.fetchTargetAktif(id),
+      patternStore.classify(),       // ← financial health classification
+    ]);
+    // Fetch adaptive prediction after target is loaded
+    if (targetStore.selected) {
+      await adaptiveStore.predict();
+    }
+  } catch (error) {
+    console.error("Gagal memuat sebagian data dashboard:", error);
+  } finally {
+    isPageLoading.value = false;
   }
-  isPageLoading.value = false;
 };
 
 onMounted(() => {
