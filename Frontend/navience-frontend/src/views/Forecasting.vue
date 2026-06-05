@@ -11,6 +11,7 @@ import { useForecastingStore } from '@/stores/forecasting';
 import Sidebar from '@/components/sidebar.vue';
 import ChatBot from '@/components/chatBot.vue';
 import ProfileDropdown from '@/components/profile.vue';
+import LoadingScreen from '@/components/loading.vue';
 
 const authStore = useAuthStore();
 const forecastingStore = useForecastingStore();
@@ -124,6 +125,9 @@ watch(userID, (id) => {
 
 <template>
   <div class="bg-background text-on-background flex h-screen overflow-hidden">
+    <!-- Loading Screen -->
+    <LoadingScreen :is-loading="forecastingStore.isLoading" message="AI sedang menganalisis pola pengeluaran..." />
+
     <!-- Sidebar Component -->
     <Sidebar ref="sidebarRef" />
 
@@ -157,16 +161,8 @@ watch(userID, (id) => {
           </div>
         </section>
 
-        <!-- Loading State -->
-        <section v-if="forecastingStore.isLoading" class="flex flex-col items-center justify-center py-24 gap-4">
-          <div class="forecast-spinner"></div>
-          <p class="font-body-md text-body-md text-on-surface-variant animate-pulse">
-            AI sedang menganalisis pola pengeluaran Anda...
-          </p>
-        </section>
-
         <!-- Error State -->
-        <section v-else-if="forecastingStore.error" class="bg-error-container/30 border border-error/20 rounded-2xl p-8 flex items-center gap-4">
+        <section v-if="forecastingStore.error" class="bg-error-container/30 border border-error/20 rounded-2xl p-8 flex items-center gap-4">
           <span class="material-symbols-outlined text-error text-3xl">error</span>
           <div>
             <p class="font-label-md text-label-md text-on-error-container">Gagal Memuat Prediksi</p>
