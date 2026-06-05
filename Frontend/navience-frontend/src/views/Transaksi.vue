@@ -219,8 +219,7 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
                   </span>
                 </td>
                 <td class="px-6 py-5 text-right font-medium" :class="trx.jenis_transaksi === 'pemasukan' ? 'text-on-tertiary-container' : 'text-on-surface'">
-                  {{ trx.jenis_transaksi === 'pemasukan' ? '+' : '-' }} Rp {{ trx.nominal.toLocaleString('id-ID') }}
-                </td>
+                  {{ trx.jenis_transaksi === 'pemasukan' ? '+' : '-' }} Rp {{ trx.nominal?.toLocaleString('id-ID') || 0 }}                </td>
                 <td class="px-6 py-5 text-center">
                   <button class="text-on-surface-variant hover:text-primary p-2 rounded-full hover:bg-surface-container-low transition-colors" @click="openModal('edit', trx)" title="Ubah Transaksi">
                     <span class="material-symbols-outlined">more_horiz</span>
