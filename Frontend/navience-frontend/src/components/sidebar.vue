@@ -28,7 +28,6 @@ const navItems = [
   { icon: 'dashboard', label: 'Overview', to: () => `/dashboard/${userID.value}`, filled: true },
   { icon: 'receipt_long', label: 'Transaksi', to: () => `/transaksi/${userID.value}`, filled: false },
   { icon: 'account_balance_wallet', label: 'Anggaran', to: () => `/anggaran/${userID.value}`, filled: false },
-  { icon: 'query_stats', label: 'Prediksi', to: () => `/forecasting/${userID.value}`, filled: false },
   { icon: 'target', label: 'Target', to: () => `/target/${userID.value}`, filled: false },
   { icon: 'person', label: 'Profil', to: () => `/profile/${userID.value}`, filled: false },
 ];
