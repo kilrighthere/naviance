@@ -322,7 +322,7 @@ watch(userID, (id) => {
         </div>
       </header>
 
-      <main class="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop space-y-8">
+      <main class="flex-1 overflow-y-auto px-margin-mobile pb-margin-mobile pt-4 md:px-margin-desktop md:pb-margin-desktop space-y-8">
         <!-- Subheader -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

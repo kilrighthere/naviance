@@ -144,7 +144,7 @@ const probProgressWidth = computed(() => {
       </header>
 
       <!-- Scrollable Content Canvas -->
-      <main class="flex-1 overflow-y-auto p-margin-desktop space-y-10">
+      <main class="flex-1 overflow-y-auto px-margin-desktop pb-margin-desktop pt-4 space-y-10">
 
         <!-- ── Top Row ──────────────────────────────────────────────────────── -->
         <div class="flex flex-col lg:flex-row gap-gutter">
@@ -170,7 +170,7 @@ const probProgressWidth = computed(() => {
                   </p>
                 </div>
                 <span
-                  class="bg-primary-container text-on-primary-container font-label-sm text-label-sm px-3 py-1.5 rounded-full uppercase tracking-wider"
+                  class="bg-secondary-container text-black font-label-sm text-label-sm px-3 py-1.5 rounded-full uppercase tracking-wider"
                   >Active</span
                 >
               </div>

@@ -7,6 +7,7 @@ import ChatBot from '@/components/chatBot.vue';
 import FormTransaksi from '@/components/formTransaksi.vue';
 import { CATEGORIES } from '@/types/transaksi';
 import LoadingScreen from '@/components/loading.vue';
+import ProfileDropdown from '@/components/profile.vue';
 
 const authStore = useAuthStore();
 const transaksiStore = useTransaksiStore();
@@ -109,15 +110,12 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
           </div>
         </div>
         <div class="flex items-center gap-4">
-
-          <div class="w-10 h-10 rounded-full bg-primary-fixed-dim border border-outline-variant/30 overflow-hidden cursor-pointer shadow-sm flex items-center justify-center text-on-primary-fixed">
-            <span class="material-symbols-outlined">account_circle</span>
-          </div>
+          <ProfileDropdown />
         </div>
       </header>
 
       <!-- Scrollable Dashboard Canvas -->
-      <main class="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop w-full">
+      <main class="flex-1 overflow-y-auto px-margin-mobile pb-margin-mobile pt-4 md:px-margin-desktop md:pb-margin-desktop w-full">
         <!-- Page Header & Actions -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 max-w-container-max mx-auto">
           <div>

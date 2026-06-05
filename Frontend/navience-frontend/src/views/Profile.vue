@@ -198,7 +198,7 @@ async function handleDeleteAccount() {
       </header>
 
       <!-- Scrollable Main Canvas -->
-      <main class="flex-1 overflow-y-auto p-margin-desktop space-y-10">
+      <main class="flex-1 overflow-y-auto px-margin-desktop pb-margin-desktop pt-4 space-y-10">
         <div class="max-w-6xl mx-auto pb-6 w-full px-4 md:px-0 mt-4 md:mt-0">
 
           <!-- Section 1: Header/Avatar -->
@@ -339,7 +339,9 @@ async function handleDeleteAccount() {
                 </div>
 
                 <div class="flex flex-col gap-4">
-                  <div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low border border-outline-variant/20">
+                  <div class="flex flex-col gap-1.5">
+                    <label class="font-label-sm text-label-sm text-on-surface-variant">Autentikasi</label>
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low border border-outline-variant/20">
                     <div class="flex items-center gap-3">
                       <span class="material-symbols-outlined text-on-surface-variant">lock</span>
                       <div>
@@ -355,6 +357,7 @@ async function handleDeleteAccount() {
                   <span class="material-symbols-outlined text-[20px]">{{ showChangePassword ? 'expand_less' : 'expand_more' }}</span>
                 </button>
               </div>
+            </div>
 
               <!-- Change password form -->
               <div v-if="showChangePassword" class="p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 space-y-4 animate-fade-in">
