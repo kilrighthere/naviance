@@ -7,6 +7,7 @@ import ChatBot from '@/components/chatBot.vue';
 import FormTransaksi from '@/components/formTransaksi.vue';
 import { CATEGORIES } from '@/types/transaksi';
 import LoadingScreen from '@/components/loading.vue';
+import ProfileDropdown from '@/components/profile.vue';
 
 const authStore = useAuthStore();
 const transaksiStore = useTransaksiStore();
@@ -92,64 +93,71 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
 
     <!-- Main Content Wrapper -->
     <div
-      class="dashboard-main-content flex-1 flex flex-col h-full bg-background relative"
+      class="dashboard-main-content flex-1 flex flex-col h-full bg-background relative min-w-0 overflow-x-hidden"
       :class="{ 'content-expanded': isSidebarMinimized }"
     >
       <!-- Top App Bar -->
-      <header class="flex justify-between items-center w-full px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10">
-        <div class="flex items-center w-full max-w-md">
-          <div class="relative w-full">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-            <input 
-              v-model="transaksiStore.searchQuery" 
-              class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-secondary-container/20 transition-all font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70" 
-              placeholder="Cari transaksi, merchant..." 
-              type="text"
-            />
+      <header class="flex justify-between items-center w-full px-margin-mobile lg:px-margin-desktop h-16 lg:h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+          <button
+            class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors shrink-0"
+            @click="sidebarRef?.toggleMobile()"
+          >
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          <div class="flex items-center flex-1 min-w-0 max-w-md">
+            <div class="relative w-full min-w-0">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+              <input 
+                v-model="transaksiStore.searchQuery" 
+                class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-secondary-container/20 transition-all font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70 min-w-0" 
+                placeholder="Cari transaksi..." 
+                type="text"
+              />
+            </div>
           </div>
         </div>
-        <div class="flex items-center gap-4">
-
-          <div class="w-10 h-10 rounded-full bg-primary-fixed-dim border border-outline-variant/30 overflow-hidden cursor-pointer shadow-sm flex items-center justify-center text-on-primary-fixed">
-            <span class="material-symbols-outlined">account_circle</span>
-          </div>
+        <div class="flex items-center gap-4 shrink-0 ml-3">
+          <ProfileDropdown />
         </div>
       </header>
 
       <!-- Scrollable Dashboard Canvas -->
-      <main class="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop w-full">
+      <main class="flex-1 overflow-y-auto overflow-x-hidden px-margin-mobile lg:px-margin-desktop pb-margin-mobile lg:pb-margin-desktop pt-4 w-full">
         <!-- Page Header & Actions -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 max-w-container-max mx-auto">
-          <div>
-            <h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface mb-2">Riwayat Transaksi</h2>
-            <p class="text-body-md font-body-md text-on-surface-variant">Kelola dan pantau arus kas Anda secara presisi.</p>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6 mb-6 md:mb-8 w-full">
+          <div class="flex-1 min-w-0">
+            <h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface mb-2 truncate">Riwayat Transaksi</h2>
+            <p class="text-body-md font-body-md text-on-surface-variant truncate">Kelola dan pantau arus kas Anda secara presisi.</p>
           </div>
-          <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto shrink-0">
             <!-- Filters -->
-            <div class="relative">
-              <select v-model="transaksiStore.filterCategory" class="appearance-none px-4 py-2 pl-10 pr-8 rounded-full border border-outline-variant/50 bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-colors shadow-sm focus:outline-none focus:border-primary cursor-pointer min-w-[140px] capitalize">
-                <option value="">Semua Kategori</option>
-                <option v-for="kat in CATEGORIES" :key="kat.id_kategori" :value="kat.id_kategori" class="capitalize">{{ kat.nama_kategori }}</option>
-              </select>
-              <span class="material-symbols-outlined text-[18px] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">filter_list</span>
-              <span class="material-symbols-outlined text-[18px] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">arrow_drop_down</span>
-            </div>
-            <div class="relative">
-              <select v-model="transaksiStore.filterTimeRange" class="appearance-none px-4 py-2 pl-10 pr-8 rounded-full border border-outline-variant/50 bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-colors shadow-sm focus:outline-none focus:border-primary cursor-pointer min-w-[150px]">
-                <option value="">Semua Waktu</option>
-                <option value="7d">7 Hari Terakhir</option>
-                <option value="30d">30 Hari Terakhir</option>
-                <option value="this_month">Bulan Ini</option>
-              </select>
-              <span class="material-symbols-outlined text-[18px] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">calendar_today</span>
-              <span class="material-symbols-outlined text-[18px] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">arrow_drop_down</span>
+            <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <div class="relative w-full">
+                <select v-model="transaksiStore.filterCategory" class="w-full appearance-none px-4 py-2 pl-10 pr-8 rounded-full border border-outline-variant/50 bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-colors shadow-sm focus:outline-none focus:border-primary cursor-pointer sm:min-w-[140px] capitalize truncate">
+                  <option value="">Semua Kategori</option>
+                  <option v-for="kat in CATEGORIES" :key="kat.id_kategori" :value="kat.id_kategori" class="capitalize">{{ kat.nama_kategori }}</option>
+                </select>
+                <span class="material-symbols-outlined text-[18px] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">filter_list</span>
+                <span class="material-symbols-outlined text-[18px] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">arrow_drop_down</span>
+              </div>
+              <div class="relative w-full">
+                <select v-model="transaksiStore.filterTimeRange" class="w-full appearance-none px-4 py-2 pl-10 pr-8 rounded-full border border-outline-variant/50 bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-colors shadow-sm focus:outline-none focus:border-primary cursor-pointer sm:min-w-[150px] truncate">
+                  <option value="">Semua Waktu</option>
+                  <option value="7d">7 Hari</option>
+                  <option value="30d">30 Hari</option>
+                  <option value="this_month">Bulan Ini</option>
+                </select>
+                <span class="material-symbols-outlined text-[18px] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">calendar_today</span>
+                <span class="material-symbols-outlined text-[18px] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">arrow_drop_down</span>
+              </div>
             </div>
             
             <!-- Primary Action -->
-            <div class="relative ml-auto md:ml-2">
-              <button @click="openModal('create')" class="bg-primary text-on-primary rounded-full px-6 py-2.5 font-label-md text-label-md flex items-center gap-2 shadow-[0_4px_12px_rgba(30,41,59,0.15)] hover:bg-primary/90 transition-colors">
-                <span class="material-symbols-outlined">add</span>
-                Input Transaksi
+            <div class="w-full sm:w-auto mt-1 sm:mt-0">
+              <button @click="openModal('create')" class="w-full sm:w-auto bg-primary text-on-primary rounded-full px-6 py-2.5 font-label-md text-label-md flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(30,41,59,0.15)] hover:bg-primary/90 transition-colors">
+                <span class="material-symbols-outlined shrink-0">add</span>
+                <span class="truncate">Input Transaksi</span>
               </button>
             </div>
           </div>

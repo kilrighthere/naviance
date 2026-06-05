@@ -170,21 +170,60 @@ body {
    ============================================= */
 @media (max-width: 1023px) {
   .sidebar-nav {
-    transform: translateX(-100%);
+    transform: translateX(calc(-100% - 20px));
     z-index: 40;
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), width 300ms ease-in-out;
+    width: 260px;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    border-radius: 0 1rem 1rem 0;
   }
 
   .sidebar-nav.sidebar-mobile-open {
     transform: translateX(0);
   }
 
+  /* On mobile, always show expanded sidebar (never minimized) */
+  .sidebar-nav.sidebar-mobile-open .sidebar-label {
+    opacity: 1;
+    width: auto;
+  }
+
+  .sidebar-nav.sidebar-mobile-open .sidebar-header {
+    opacity: 1;
+    height: auto;
+    overflow: visible;
+  }
+
+  .sidebar-nav.sidebar-mobile-open .minimized-logo {
+    display: none;
+  }
+
+  .sidebar-nav.sidebar-mobile-open .sidebar-link {
+    justify-content: flex-start;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
   .dashboard-main-content {
-    margin-left: 0;
+    margin-left: 0 !important;
   }
 
   .dashboard-main-content.content-expanded {
-    margin-left: 0;
+    margin-left: 0 !important;
   }
+}
+
+/* Sidebar backdrop transition */
+.sidebar-backdrop-enter-active,
+.sidebar-backdrop-leave-active {
+  transition: opacity 300ms ease;
+}
+
+.sidebar-backdrop-enter-from,
+.sidebar-backdrop-leave-to {
+  opacity: 0;
 }
 
 /* =============================================

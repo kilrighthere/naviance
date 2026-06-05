@@ -355,46 +355,34 @@ watch(
     >
       <!-- Top App Bar -->
       <header
-        class="flex justify-between items-center w-full px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10"
+        class="flex justify-between items-center w-full px-margin-mobile lg:px-margin-desktop h-16 lg:h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10"
       >
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 lg:gap-4">
+          <button
+            class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            @click="sidebarRef?.toggleMobile()"
+          >
+            <span class="material-symbols-outlined">menu</span>
+          </button>
           <h2 class="font-headline-md text-headline-md text-primary">Overview</h2>
         </div>
-        <div class="flex items-center gap-6 text-on-surface-variant">
+        <div class="flex items-center gap-4 lg:gap-6 text-on-surface-variant">
           <ProfileDropdown />
         </div>
       </header>
 
       <!-- Scrollable Dashboard Canvas -->
-      <main class="flex-1 overflow-y-auto p-margin-desktop space-y-10">
+      <main class="flex-1 overflow-y-auto px-margin-mobile lg:px-margin-desktop pb-margin-mobile lg:pb-margin-desktop pt-4 space-y-6">
 
         <!-- Page Header -->
         <section class="flex justify-between items-end flex-wrap gap-4">
           <div>
-            <h2 class="font-headline-lg text-headline-lg text-on-background mb-2">
+            <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-2">
               Halo, {{ userName }}
             </h2>
             <p class="font-body-md text-body-md text-on-surface-variant">
               Berikut adalah ringkasan finansial Anda bulan ini.
             </p>
-          </div>
-          <div class="flex items-center gap-4">
-            <button
-              id="btn-add-transaction"
-              class="flex items-center gap-2 border-2 border-secondary text-secondary font-label-md text-label-md px-6 py-3 rounded-xl hover:bg-secondary/5 transition-colors"
-              @click="openFormTransaksi"
-            >
-              <span class="material-symbols-outlined">add</span>
-              Tambah Transaksi
-            </button>
-            <RouterLink
-              id="btn-tanya-ai"
-              :to="`/chatbot/${userID}`"
-              class="flex items-center gap-2 bg-primary text-on-primary font-label-md text-label-md px-6 py-3 rounded-xl shadow-sm hover:bg-primary/90 transition-colors"
-            >
-              <span class="material-symbols-outlined">smart_toy</span>
-              Tanya AI Naviance
-            </RouterLink>
           </div>
         </section>
 
@@ -477,65 +465,125 @@ watch(
           </div>
         </section>
 
+        <!-- Target Tabungan Widget -->
+        <section class="w-full">
+<!-- Widget: Target Tabungan -->
+          <div
+            class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 w-full"
+              id="card-target-tabungan"
+            >
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="font-headline-md text-headline-md text-on-background">Target Tabungan</h3>
+                <RouterLink
+                  :to="`/target/${userID}`"
+                  class="text-secondary-container hover:text-secondary transition-colors"
+                  id="btn-add-goal"
+                >
+                  <span class="material-symbols-outlined">{{
+                    targetStore.selected ? 'arrow_forward' : 'add_circle'
+                  }}</span>
+                </RouterLink>
+              </div>
+
+              <!-- Progress Item -->
+              <div v-if="targetStore.selected" class="space-y-4">
+                <div class="flex justify-between items-end">
+                  <div>
+                    <h4 class="font-label-md text-label-md text-on-background">
+                      {{ targetStore.selected.nama_target }}
+                    </h4>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">
+                      Rp {{ totalTabungan.toLocaleString('id-ID') }} / Rp
+                      {{ targetStore.selected.nominal_target.toLocaleString('id-ID') }}
+                    </p>
+                  </div>
+                  <span class="font-label-md text-label-md text-primary">
+                    {{ progressTabungan.toFixed(1) }}%
+                  </span>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-gradient-to-r from-secondary-container to-secondary rounded-full"
+                    :style="{ width: progressTabungan + '%' }"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Empty state -->
+              <div v-else class="py-4 text-center">
+                <p class="font-body-md text-body-md text-on-surface-variant mb-2">
+                  Belum ada target aktif
+                </p>
+                <RouterLink
+                  :to="`/target/${userID}`"
+                  class="text-secondary font-label-md text-label-md hover:underline"
+                >Buat Target Sekarang</RouterLink>
+              </div>
+
+              <!-- ── AI Insight Card (now powered by adaptive store) ── -->
+              <div
+                class="mt-8 p-4 bg-surface-container rounded-xl flex items-start gap-3 border border-outline-variant/10"
+              >
+                <span
+                  class="material-symbols-outlined text-xl"
+                  :class="[aiInsightColor, adaptiveStore.isLoading ? 'animate-spin' : '']"
+                  style="font-variation-settings: 'FILL' 1"
+                >
+                  {{ aiInsightIcon }}
+                </span>
+                <div>
+                  <p class="font-label-md text-label-md text-on-background mb-1">AI Insight</p>
+                  <p class="font-body-md text-body-md text-on-surface-variant text-sm">
+                    {{ aiInsightText }}
+                  </p>
+                </div>
+              </div>
+            </div>
+        </section>
+
         <!-- Top Row: Metrics Grid -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
           <!-- Card: Total Pemasukan -->
           <div
-            class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col justify-between hover:shadow-md transition-shadow"
+            class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-4 hover:shadow-md transition-shadow flex items-start justify-between"
             id="card-pemasukan"
           >
-            <div class="flex justify-between items-start mb-4">
-              <span class="font-label-md text-label-md text-on-surface-variant">Total Pemasukan</span>
-              <div class="w-10 h-10 rounded-full bg-tertiary-fixed/20 flex items-center justify-center text-on-tertiary-fixed">
-                <span class="material-symbols-outlined">arrow_upward</span>
-              </div>
-            </div>
             <div>
+              <span class="font-label-md text-label-md text-on-surface-variant block mb-0.5">Total Pemasukan</span>
               <h3 class="font-headline-md text-headline-md text-on-background">
                 Rp {{ totalPemasukan.toLocaleString('id-ID') }}
               </h3>
-              <p class="font-label-sm text-label-sm text-on-tertiary-container mt-2 flex items-center gap-1">
-                <span class="material-symbols-outlined text-[16px]">trending_up</span>
-                +12% dari bulan lalu
-              </p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-tertiary-fixed/20 flex items-center justify-center text-on-tertiary-fixed shrink-0">
+              <span class="material-symbols-outlined">arrow_upward</span>
             </div>
           </div>
 
           <!-- Card: Total Pengeluaran -->
           <div
-            class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col justify-between hover:shadow-md transition-shadow"
+            class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-4 hover:shadow-md transition-shadow flex items-start justify-between"
             id="card-pengeluaran"
           >
-            <div class="flex justify-between items-start mb-4">
-              <span class="font-label-md text-label-md text-on-surface-variant">Total Pengeluaran</span>
-              <div class="w-10 h-10 rounded-full bg-error-container/50 flex items-center justify-center text-error">
-                <span class="material-symbols-outlined">arrow_downward</span>
-              </div>
-            </div>
             <div>
+              <span class="font-label-md text-label-md text-on-surface-variant block mb-0.5">Total Pengeluaran</span>
               <h3 class="font-headline-md text-headline-md text-on-background">
                 Rp {{ totalPengeluaran.toLocaleString('id-ID') }}
               </h3>
-              <p class="font-label-sm text-label-sm text-error mt-2 flex items-center gap-1">
-                <span class="material-symbols-outlined text-[16px]">warning</span>
-                Mendekati limit budget
-              </p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-error-container/50 flex items-center justify-center text-error shrink-0">
+              <span class="material-symbols-outlined">arrow_downward</span>
             </div>
           </div>
 
           <!-- Card: Sisa Anggaran -->
           <div
-            class="bg-primary text-on-primary rounded-2xl shadow-sm p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden"
+            class="bg-primary text-on-primary rounded-2xl shadow-sm p-4 relative overflow-hidden flex items-start justify-between"
             id="card-sisa-anggaran"
           >
             <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary-fixed/10 rounded-full blur-2xl"></div>
-            <div class="flex justify-between items-start mb-4 relative z-10">
-              <span class="font-label-md text-label-md text-primary-fixed">Sisa Anggaran</span>
-              <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary-fixed">
-                <span class="material-symbols-outlined">account_balance_wallet</span>
-              </div>
-            </div>
             <div class="relative z-10">
+              <span class="font-label-md text-label-md text-primary-fixed block mb-0.5">Sisa Anggaran</span>
               <h3 class="font-headline-md text-headline-md">
                 Rp {{ totalSisaAnggaran.toLocaleString('id-ID') }}
               </h3>
@@ -553,15 +601,18 @@ watch(
                 }}
               </p>
             </div>
+            <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary-fixed shrink-0 relative z-10">
+              <span class="material-symbols-outlined">account_balance_wallet</span>
+            </div>
           </div>
         </section>
 
-        <!-- Middle Section: Bento Grid -->
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+        <!-- Middle Section: Chart Area -->
+        <section class="grid grid-cols-1 gap-gutter">
 
-          <!-- Chart Area: Ringkasan Bulanan (Span 2 cols) -->
+          <!-- Chart Area: Ringkasan Bulanan -->
           <div
-            class="lg:col-span-2 bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col chart-container"
+            class=" bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex flex-col chart-container"
             id="chart-ringkasan"
           >
             <div class="flex justify-between items-center mb-6">
@@ -578,7 +629,7 @@ watch(
             <!-- SVG Line Chart -->
             <div
               ref="chartAreaRef"
-              class="flex-1 min-h-[240px] relative w-full flex items-end justify-between px-2"
+              class="flex-1 min-h-[180px] md:min-h-[240px] relative w-full flex items-end justify-between px-2"
               @mousemove="onChartMouseMove"
               @mouseleave="onChartMouseLeave"
             >
@@ -667,82 +718,7 @@ watch(
             </div>
           </div>
 
-          <!-- Widget: Target Tabungan -->
-          <div class="lg:col-span-1 flex flex-col gap-gutter">
-            <div
-              class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/20 p-6 flex-1"
-              id="card-target-tabungan"
-            >
-              <div class="flex justify-between items-center mb-6">
-                <h3 class="font-headline-md text-headline-md text-on-background">Target Tabungan</h3>
-                <RouterLink
-                  :to="`/target/${userID}`"
-                  class="text-secondary-container hover:text-secondary transition-colors"
-                  id="btn-add-goal"
-                >
-                  <span class="material-symbols-outlined">{{
-                    targetStore.selected ? 'arrow_forward' : 'add_circle'
-                  }}</span>
-                </RouterLink>
-              </div>
-
-              <!-- Progress Item -->
-              <div v-if="targetStore.selected" class="space-y-4">
-                <div class="flex justify-between items-end">
-                  <div>
-                    <h4 class="font-label-md text-label-md text-on-background">
-                      {{ targetStore.selected.nama_target }}
-                    </h4>
-                    <p class="font-label-sm text-label-sm text-on-surface-variant">
-                      Rp {{ totalTabungan.toLocaleString('id-ID') }} / Rp
-                      {{ targetStore.selected.nominal_target.toLocaleString('id-ID') }}
-                    </p>
-                  </div>
-                  <span class="font-label-md text-label-md text-primary">
-                    {{ progressTabungan.toFixed(1) }}%
-                  </span>
-                </div>
-                <!-- Progress Bar -->
-                <div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
-                  <div
-                    class="h-full bg-gradient-to-r from-secondary-container to-secondary rounded-full"
-                    :style="{ width: progressTabungan + '%' }"
-                  ></div>
-                </div>
-              </div>
-
-              <!-- Empty state -->
-              <div v-else class="py-4 text-center">
-                <p class="font-body-md text-body-md text-on-surface-variant mb-2">
-                  Belum ada target aktif
-                </p>
-                <RouterLink
-                  :to="`/target/${userID}`"
-                  class="text-secondary font-label-md text-label-md hover:underline"
-                >Buat Target Sekarang</RouterLink>
-              </div>
-
-              <!-- ── AI Insight Card (now powered by adaptive store) ── -->
-              <div
-                class="mt-8 p-4 bg-surface-container rounded-xl flex items-start gap-3 border border-outline-variant/10"
-              >
-                <span
-                  class="material-symbols-outlined text-xl"
-                  :class="[aiInsightColor, adaptiveStore.isLoading ? 'animate-spin' : '']"
-                  style="font-variation-settings: 'FILL' 1"
-                >
-                  {{ aiInsightIcon }}
-                </span>
-                <div>
-                  <p class="font-label-md text-label-md text-on-background mb-1">AI Insight</p>
-                  <p class="font-body-md text-body-md text-on-surface-variant text-sm">
-                    {{ aiInsightText }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+          </section>
 
         <!-- Recent Transactions -->
         <section
