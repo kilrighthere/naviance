@@ -6,7 +6,7 @@ import { ratioFeature } from "../services/featureEngineering/ratioFeatureService
 import { buildGoalFeatures } from "../services/adaptivePlanning/goalFeatureService.js";
 import { buildAdaptivePayload } from "../services/adaptivePlanning/AdaptivePlanningPayloadService.js";
 import { validateAdaptivePlaningPayload } from "../validators/forecastValidator.js";
-import { AdaptivePlanning } from "../services/adaptivePlanning/adaptivePlanningApiService.js";
+import { adaptivePlanningService } from "../services/adaptivePlanning/adaptivePlanningApiService.js"
 
 export const getAdaptivePlanning = async (req, res, next) => {
     try {

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const AdaptivePlanning = async (bodyPayload) => {
+export const adaptivePlanningService = async (bodyPayload) => {
     try {
         const response = await axios.post(
             process.env.FORECAST_API_URL,
