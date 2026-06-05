@@ -145,28 +145,12 @@ const openModal = (mode: 'create' | 'edit', trx?: any) => {
               <span class="material-symbols-outlined text-[18px] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">arrow_drop_down</span>
             </div>
             
-            <!-- Primary Action Dropdown -->
+            <!-- Primary Action -->
             <div class="relative ml-auto md:ml-2">
-              <button @click="isDropdownOpen = !isDropdownOpen" class="bg-primary text-on-primary rounded-full px-6 py-2.5 font-label-md text-label-md flex items-center gap-2 shadow-[0_4px_12px_rgba(30,41,59,0.15)] hover:bg-primary/90 transition-colors">
+              <button @click="openModal('create')" class="bg-primary text-on-primary rounded-full px-6 py-2.5 font-label-md text-label-md flex items-center gap-2 shadow-[0_4px_12px_rgba(30,41,59,0.15)] hover:bg-primary/90 transition-colors">
                 <span class="material-symbols-outlined">add</span>
                 Input Transaksi
               </button>
-              
-              <!-- Transparent backdrop to close dropdown on outside click -->
-              <div v-if="isDropdownOpen" class="fixed inset-0 z-10" @click="isDropdownOpen = false"></div>
-              
-              <!-- Dropdown Menu -->
-              <div class="absolute right-0 mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-[0_8px_24px_rgba(30,41,59,0.1)] border border-outline-variant/30 transition-all duration-200 transform origin-top-right z-20 py-2" :class="isDropdownOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'">
-                <a class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-container-low transition-colors text-on-surface font-label-md text-label-md cursor-pointer" @click.prevent="openModal('create'); isDropdownOpen = false">
-                  <span class="material-symbols-outlined text-on-surface-variant">edit_document</span> 
-                  Manual Form
-                </a>
-                <a class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-container-low transition-colors text-on-surface font-label-md text-label-md cursor-pointer" @click.prevent="isDropdownOpen = false">
-                  <span class="material-symbols-outlined text-secondary-container">document_scanner</span> 
-                  OCR Scanner
-                  <span class="ml-auto text-[10px] bg-secondary-container/20 text-secondary px-2 py-0.5 rounded-full uppercase font-bold">AI</span>
-                </a>
-              </div>
             </div>
           </div>
         </div>

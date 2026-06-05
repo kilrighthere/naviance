@@ -337,13 +337,14 @@ watch(userID, (id) => {
               <span class="material-symbols-outlined">add</span>
               Tambah Transaksi
             </button>
-            <button
-              id="btn-scan-ocr"
+            <RouterLink
+              id="btn-tanya-ai"
+              :to="`/chatbot/${userID}`"
               class="flex items-center gap-2 bg-primary text-on-primary font-label-md text-label-md px-6 py-3 rounded-xl shadow-sm hover:bg-primary/90 transition-colors"
             >
-              <span class="material-symbols-outlined">document_scanner</span>
-              Scan Struk (OCR)
-            </button>
+              <span class="material-symbols-outlined">smart_toy</span>
+              Tanya AI Naviance
+            </RouterLink>
           </div>
         </section>
 

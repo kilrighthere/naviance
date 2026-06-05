@@ -10,7 +10,6 @@ import Transaksi from '@/views/Transaksi.vue'
 import Anggaran from '@/views/Anggaran.vue'
 import Target from '@/views/Target.vue'
 import Chatbot from '@/views/Chatbot.vue'
-import Forecasting from '@/views/Forecasting.vue'
 
 const routes = [
   {
@@ -72,13 +71,6 @@ const routes = [
     meta: {
       requiresAuth: true
     }
-  },
-  {
-    path: '/forecasting/:userId',
-    component: Forecasting,
-    meta: {
-      requiresAuth: true
-    }
   }
 ]
 
@@ -94,11 +86,11 @@ router.beforeEach(async (to, from, next) => {
   const userId = session?.user?.id
 
   if (to.path === '/' && userId) {
-    return next({ path: `/dashboard/${userId}` })
+    return next({ path: `/chatbot/${userId}` })
   }
 
   if (to.meta.requiresGuest && userId) {
-    return next({ path: `/dashboard/${userId}` })
+    return next({ path: `/chatbot/${userId}` })
   }
 
   if (
@@ -110,7 +102,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.requiresAuth && userId && to.params.userId !== userId) {
-    return next({ path: `/dashboard/${userId}` })
+    return next({ path: `/chatbot/${userId}` })
   }
 
   next()

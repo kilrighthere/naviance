@@ -135,15 +135,16 @@ const handleDelete = async () => {
     <div class="absolute inset-0 bg-on-background/40 backdrop-blur-sm" @click="close"></div>
     
     <!-- Modal -->
-    <div class="bg-surface rounded-2xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden border border-outline-variant/30">
-      <div class="bg-primary-container px-6 py-4 flex justify-between items-center">
-        <h3 class="text-headline-md font-headline-md text-on-primary">{{ title }}</h3>
-        <button class="text-on-primary/70 hover:text-on-primary transition-colors" @click="close" type="button">
-          <span class="material-symbols-outlined">close</span>
+    <div class="relative bg-white w-full max-w-[540px] rounded-2xl shadow-[0_8px_24px_rgba(30,41,59,0.10)] border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[85vh] z-10">
+      <div class="p-6 border-b border-surface-variant/50 flex justify-between items-center shrink-0">
+        <h3 class="font-headline-md text-headline-md text-primary leading-tight">{{ title }}</h3>
+        <button class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-full hover:bg-surface-container-high shrink-0" @click="close" type="button">
+          <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
       </div>
       
-      <form class="p-6 space-y-5" @submit.prevent="handleSave">
+      <form class="flex-1 flex flex-col min-h-0" @submit.prevent="handleSave">
+        <div class="flex-1 overflow-y-auto p-6 space-y-5" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 #ffffff;">
         <!-- Tipe Transaksi Tabs -->
         <div class="flex bg-surface-container-low p-1 rounded-xl">
           <input class="hidden peer/pengeluaran" id="type-pengeluaran" name="type" type="radio" value="pengeluaran" v-model="transaksiStore.payload.jenis_transaksi" />
@@ -223,14 +224,14 @@ const handleDelete = async () => {
             <label class="font-label-md text-label-md text-on-surface-variant px-1">Nominal Setoran</label>
             <div class="relative">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 font-label-md text-on-surface-variant">Rp</span>
-              <input class="w-full pl-12 pr-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-headline-md text-headline-md" placeholder="0" type="number" v-model.number="transaksiStore.payload.nominal" required />
+              <input class="w-full pl-12 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-headline-md text-headline-md" placeholder="0" type="number" v-model.number="transaksiStore.payload.nominal" required />
             </div>
           </div>
 
           <!-- Tanggal -->
           <div class="space-y-1.5">
             <label class="font-label-md text-label-md text-on-surface-variant px-1">Tanggal</label>
-            <input class="w-full px-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-body-md text-body-md text-on-surface" type="date" v-model="transaksiStore.payload.tanggal_transaksi" required />
+            <input class="w-full px-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-body-md text-body-md text-on-surface" type="date" v-model="transaksiStore.payload.tanggal_transaksi" required />
           </div>
         </template>
 
@@ -240,50 +241,57 @@ const handleDelete = async () => {
             <label class="font-label-md text-label-md text-on-surface-variant px-1">Nominal</label>
             <div class="relative">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 font-label-md text-on-surface-variant">Rp</span>
-              <input class="w-full pl-12 pr-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-headline-md text-headline-md" placeholder="0" type="number" v-model.number="transaksiStore.payload.nominal" required />
+              <input class="w-full pl-12 pr-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-headline-md text-headline-md" placeholder="0" type="number" v-model.number="transaksiStore.payload.nominal" required />
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1.5">
               <label class="font-label-md text-label-md text-on-surface-variant px-1">Kategori</label>
-              <select class="w-full px-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-body-md text-body-md text-on-surface capitalize" v-model="transaksiStore.payload.id_kategori" required>
+              <select class="w-full px-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-body-md text-body-md text-on-surface capitalize" v-model="transaksiStore.payload.id_kategori" required>
                 <option value="" disabled>Pilih Kategori</option>
                 <option v-for="kat in categories" :key="kat.id_kategori" :value="kat.id_kategori" class="capitalize">{{ kat.nama_kategori }}</option>
               </select>
             </div>
             <div class="space-y-1.5">
               <label class="font-label-md text-label-md text-on-surface-variant px-1">Tanggal</label>
-              <input class="w-full px-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-body-md text-body-md text-on-surface" type="date" v-model="transaksiStore.payload.tanggal_transaksi" required />
+              <input class="w-full px-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-body-md text-body-md text-on-surface" type="date" v-model="transaksiStore.payload.tanggal_transaksi" required />
             </div>
           </div>
 
           <div class="space-y-1.5">
             <label class="font-label-md text-label-md text-on-surface-variant px-1">Nama Transaksi</label>
-            <input class="w-full px-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-body-md text-body-md text-on-surface" placeholder="Contoh: Makan Siang, Gaji Bulanan" type="text" v-model="transaksiStore.payload.nama_transaksi" required />
+            <input class="w-full px-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-body-md text-body-md text-on-surface" placeholder="Contoh: Makan Siang, Gaji Bulanan" type="text" v-model="transaksiStore.payload.nama_transaksi" required />
           </div>
 
           <div class="space-y-1.5">
             <label class="font-label-md text-label-md text-on-surface-variant px-1">Nama Toko <span class="text-outline font-normal">(Opsional)</span></label>
-            <input class="w-full px-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-body-md text-body-md text-on-surface" placeholder="Contoh: Starbucks, Uniqlo" type="text" v-model="transaksiStore.payload.nama_toko" />
+            <input class="w-full px-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-body-md text-body-md text-on-surface" placeholder="Contoh: Starbucks, Uniqlo" type="text" v-model="transaksiStore.payload.nama_toko" />
           </div>
 
           <div class="space-y-1.5">
             <label class="font-label-md text-label-md text-on-surface-variant px-1">Deskripsi</label>
-            <textarea class="w-full px-4 py-3 rounded-xl border-outline-variant bg-surface-container-lowest focus:ring-secondary-container focus:border-secondary-container font-body-md text-body-md text-on-surface" placeholder="Tambah catatan..." rows="2" v-model="transaksiStore.payload.deskripsi" required></textarea>
+            <textarea class="w-full px-4 py-3 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white font-body-md text-body-md text-on-surface" placeholder="Tambah catatan..." rows="2" v-model="transaksiStore.payload.deskripsi" required></textarea>
           </div>
         </template>
 
-        <div class="flex gap-4 pt-4">
-          <button v-if="props.mode === 'edit'" class="px-5 py-3 rounded-xl font-label-md text-label-md border-2 border-error/50 text-error hover:bg-error/10 transition-colors flex justify-center items-center" type="button" @click="handleDelete" :disabled="transaksiStore.isLoading" title="Hapus Transaksi">
-            <span class="material-symbols-outlined">delete</span>
-          </button>
-          
-          <button class="flex-1 py-3 rounded-xl font-label-md text-label-md border-2 border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors" type="button" @click="close">Batal</button>
-          <button class="flex-1 py-3 rounded-xl font-label-md text-label-md bg-secondary text-on-secondary shadow-lg shadow-secondary-container/20 hover:opacity-90 transition-all flex justify-center items-center" type="submit" :disabled="transaksiStore.isLoading || (isTabungan && activeTargets.length === 0)">
-            <span v-if="transaksiStore.isLoading" class="material-symbols-outlined animate-spin mr-2">progress_activity</span>
-            Simpan
-          </button>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="p-6 border-t border-surface-variant/50 bg-white shrink-0">
+          <div class="flex gap-3 justify-end">
+            <button v-if="props.mode === 'edit'" class="px-4 py-2.5 rounded-lg font-label-md text-label-md border border-error/50 text-error hover:bg-error/10 transition-colors flex justify-center items-center" type="button" @click="handleDelete" :disabled="transaksiStore.isLoading" title="Hapus Transaksi">
+              <span class="material-symbols-outlined text-sm mr-1">delete</span> Hapus
+            </button>
+            
+            <button class="px-6 py-2.5 border border-outline-variant rounded-lg font-label-md text-label-md text-primary hover:bg-surface-container-high transition-colors" type="button" @click="close">
+              Batal
+            </button>
+            <button class="px-6 py-2.5 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container/90 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed" type="submit" :disabled="transaksiStore.isLoading || (isTabungan && activeTargets.length === 0)">
+              <span v-if="transaksiStore.isLoading" class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+              Simpan
+            </button>
+          </div>
         </div>
       </form>
     </div>
