@@ -4,9 +4,9 @@ import { buildAggregateFeatures } from "../services/featureEngineering/aggregate
 import { categoryFeature } from "../services/featureEngineering/categoryFeatureService.js";
 import { ratioFeature } from "../services/featureEngineering/ratioFeatureService.js";
 import { buildGoalFeatures } from "../services/adaptivePlanning/goalFeatureService.js";
-import { buildAdaptivePayload } from "../services/adaptivePlanning/AdaptivePlanningPayloadService.js";
+import { buildAdaptivePayload } from "../services/adaptivePlanning/adaptivePlanningPayloadService.js";
 import { validateAdaptivePlaningPayload } from "../validators/forecastValidator.js";
-import { adaptivePlanningService } from "../services/adaptivePlanning/adaptivePlanningApiService.js"
+import { adaptivePlanningService } from "../services/adaptivePlanning/adaptivePlanningApiService.js";
 
 export const getAdaptivePlanning = async (req, res, next) => {
     try {
