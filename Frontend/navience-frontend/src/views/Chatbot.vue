@@ -190,14 +190,19 @@ function renderMarkdown(text: string): string {
     >
       <!-- Top Header Bar -->
       <header
-        class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10 shrink-0"
+        class="flex justify-between items-center w-full px-margin-mobile lg:px-margin-desktop h-16 lg:h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10 shrink-0"
       >
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 lg:gap-4">
+          <button
+            class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            @click="sidebarRef?.toggleMobile()"
+          >
+            <span class="material-symbols-outlined">menu</span>
+          </button>
           <div>
             <h1 class="font-headline-md text-headline-md text-primary-container tracking-tight">
               Asisten AI Naviance
             </h1>
-
           </div>
         </div>
         <div class="flex items-center gap-4 text-on-surface-variant">
@@ -225,12 +230,12 @@ function renderMarkdown(text: string): string {
           <div
             ref="chatScrollRef"
             class="flex-1 p-4 md:p-6 chat-scroll bg-surface/50"
-            :class="isEmpty ? 'overflow-hidden flex flex-col justify-center' : 'overflow-y-auto'"
+            :class="isEmpty ? 'overflow-y-auto flex flex-col' : 'overflow-y-auto'"
           >
             <!-- ===== EMPTY STATE (Initial View) ===== -->
             <div
               v-if="isEmpty"
-              class="max-w-4xl mx-auto flex flex-col items-center py-12 px-4"
+              class="max-w-4xl mx-auto my-auto flex flex-col items-center py-12 px-4"
             >
               <div class="text-center mb-10">
                 <h2

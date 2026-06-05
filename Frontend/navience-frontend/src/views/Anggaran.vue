@@ -312,11 +312,17 @@ watch(userID, (id) => {
       :class="{ 'content-expanded': isSidebarMinimized }"
     >
       <!-- Page Header with Profile Dropdown included in flex layout (Dashboard style) -->
-      <header class="flex justify-between items-center w-full px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10">
-        <div class="flex items-center gap-4">
+      <header class="flex justify-between items-center w-full px-margin-mobile lg:px-margin-desktop h-16 lg:h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10">
+        <div class="flex items-center gap-3 lg:gap-4">
+          <button
+            class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            @click="sidebarRef?.toggleMobile()"
+          >
+            <span class="material-symbols-outlined">menu</span>
+          </button>
           <h2 class="font-headline-md text-headline-md text-primary tracking-tight">Anggaran</h2>
         </div>
-        <div class="flex items-center gap-6 text-on-surface-variant">
+        <div class="flex items-center gap-4 lg:gap-6 text-on-surface-variant">
 
           <ProfileDropdown />
         </div>
@@ -362,7 +368,7 @@ watch(userID, (id) => {
               
               <div class="flex-1 flex flex-col items-center justify-center gap-8">
                 <!-- Donut Chart representation -->
-                <div class="relative flex-shrink-0 w-64 h-64">
+                <div class="relative flex-shrink-0 w-48 h-48 md:w-64 md:h-64">
                   <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                     <circle class="stroke-tertiary-fixed-dim" cx="18" cy="18" fill="none" r="16" stroke-width="3.5"></circle>
                     <circle class="stroke-primary" cx="18" cy="18" fill="none" r="16" :stroke-dasharray="`${percentageDigunakan}, 100`" stroke-linecap="round" stroke-width="3.5"></circle>

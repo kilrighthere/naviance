@@ -185,11 +185,17 @@ async function handleDeleteAccount() {
       :class="{ 'content-expanded': isSidebarMinimized }"
     >
       <!-- Top App Bar -->
-      <header class="flex justify-between items-center w-full px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10">
-        <div class="flex items-center gap-4">
+      <header class="flex justify-between items-center w-full px-margin-mobile lg:px-margin-desktop h-16 lg:h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10">
+        <div class="flex items-center gap-3 lg:gap-4">
+          <button
+            class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            @click="sidebarRef?.toggleMobile()"
+          >
+            <span class="material-symbols-outlined">menu</span>
+          </button>
           <h2 class="font-headline-md text-headline-md text-primary">Profil</h2>
         </div>
-        <div class="flex items-center gap-6 text-on-surface-variant">
+        <div class="flex items-center gap-4 lg:gap-6 text-on-surface-variant">
 
           <button class="hover:text-primary transition-colors flex items-center" id="btn-profile-avatar">
             <span class="material-symbols-outlined text-3xl">account_circle</span>
@@ -198,7 +204,7 @@ async function handleDeleteAccount() {
       </header>
 
       <!-- Scrollable Main Canvas -->
-      <main class="flex-1 overflow-y-auto px-margin-desktop pb-margin-desktop pt-4 space-y-10">
+      <main class="flex-1 overflow-y-auto px-margin-mobile lg:px-margin-desktop pb-margin-mobile lg:pb-margin-desktop pt-4 space-y-10">
         <div class="max-w-6xl mx-auto pb-6 w-full px-4 md:px-0 mt-4 md:mt-0">
 
           <!-- Section 1: Header/Avatar -->

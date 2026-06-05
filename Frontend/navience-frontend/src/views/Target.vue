@@ -17,8 +17,10 @@ import AddTargetModal from '@/components/AddTargetModal.vue';
 
 const authStore = useAuthStore();
 const targetStore = useTargetStore();
-const transaksiStore = useTransaksiStore();
+
+const userID = computed(() => authStore.user?.id ?? '');
 const adaptiveStore = useAdaptiveStore();
+const transaksiStore = useTransaksiStore();
 
 // ─── Data Loading ─────────────────────────────────────────────────────────────
 
@@ -122,13 +124,19 @@ const probProgressWidth = computed(() => {
     >
       <!-- Top App Bar -->
       <header
-        class="flex justify-between items-center w-full px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10"
+        class="flex justify-between items-center w-full px-margin-mobile lg:px-margin-desktop h-16 lg:h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10"
       >
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 lg:gap-4">
+          <button
+            class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            @click="sidebarRef?.toggleMobile()"
+          >
+            <span class="material-symbols-outlined">menu</span>
+          </button>
           <h2 class="font-headline-md text-headline-md text-primary">Manajemen Target</h2>
         </div>
-        <div class="flex items-center gap-6 text-on-surface-variant">
-          <div class="relative hidden sm:block">
+        <div class="flex items-center gap-4 lg:gap-6 text-on-surface-variant">
+          <div class="relative hidden md:block">
             <span
               class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
               >search</span
@@ -144,7 +152,7 @@ const probProgressWidth = computed(() => {
       </header>
 
       <!-- Scrollable Content Canvas -->
-      <main class="flex-1 overflow-y-auto px-margin-desktop pb-margin-desktop pt-4 space-y-10">
+      <main class="flex-1 overflow-y-auto px-margin-mobile lg:px-margin-desktop pb-margin-mobile lg:pb-margin-desktop pt-4 space-y-10">
 
         <!-- ── Top Row ──────────────────────────────────────────────────────── -->
         <div class="flex flex-col lg:flex-row gap-gutter">

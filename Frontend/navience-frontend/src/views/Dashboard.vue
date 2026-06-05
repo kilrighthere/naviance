@@ -355,23 +355,29 @@ watch(
     >
       <!-- Top App Bar -->
       <header
-        class="flex justify-between items-center w-full px-margin-desktop h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10"
+        class="flex justify-between items-center w-full px-margin-mobile lg:px-margin-desktop h-16 lg:h-20 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 sticky top-0 z-10"
       >
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 lg:gap-4">
+          <button
+            class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            @click="sidebarRef?.toggleMobile()"
+          >
+            <span class="material-symbols-outlined">menu</span>
+          </button>
           <h2 class="font-headline-md text-headline-md text-primary">Overview</h2>
         </div>
-        <div class="flex items-center gap-6 text-on-surface-variant">
+        <div class="flex items-center gap-4 lg:gap-6 text-on-surface-variant">
           <ProfileDropdown />
         </div>
       </header>
 
       <!-- Scrollable Dashboard Canvas -->
-      <main class="flex-1 overflow-y-auto px-margin-desktop pb-margin-desktop pt-4 space-y-6">
+      <main class="flex-1 overflow-y-auto px-margin-mobile lg:px-margin-desktop pb-margin-mobile lg:pb-margin-desktop pt-4 space-y-6">
 
         <!-- Page Header -->
         <section class="flex justify-between items-end flex-wrap gap-4">
           <div>
-            <h2 class="font-headline-lg text-headline-lg text-on-background mb-2">
+            <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-2">
               Halo, {{ userName }}
             </h2>
             <p class="font-body-md text-body-md text-on-surface-variant">
@@ -623,7 +629,7 @@ watch(
             <!-- SVG Line Chart -->
             <div
               ref="chartAreaRef"
-              class="flex-1 min-h-[240px] relative w-full flex items-end justify-between px-2"
+              class="flex-1 min-h-[180px] md:min-h-[240px] relative w-full flex items-end justify-between px-2"
               @mousemove="onChartMouseMove"
               @mouseleave="onChartMouseLeave"
             >

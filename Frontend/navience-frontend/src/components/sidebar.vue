@@ -18,9 +18,18 @@ const handleLogout = async () => {
 };
 
 const isMinimized = ref(false);
+const isMobileOpen = ref(false);
 
 const toggleSidebar = () => {
   isMinimized.value = !isMinimized.value;
+};
+
+const toggleMobile = () => {
+  isMobileOpen.value = !isMobileOpen.value;
+};
+
+const closeMobile = () => {
+  isMobileOpen.value = false;
 };
 
 const navItems = [
@@ -38,17 +47,26 @@ const isActive = (to: string) => {
   return route.path === to || route.path.startsWith(to + '/');
 };
 
-defineExpose({ isMinimized });
+defineExpose({ isMinimized, isMobileOpen, toggleMobile });
 </script>
 
 <template>
+  <!-- Mobile Backdrop Overlay -->
+  <Transition name="sidebar-backdrop">
+    <div
+      v-if="isMobileOpen"
+      class="fixed inset-0 bg-on-background/40 backdrop-blur-sm z-30 lg:hidden"
+      @click="closeMobile"
+    ></div>
+  </Transition>
+
   <nav
-    class="sidebar-nav bg-surface/80 backdrop-blur-md shadow-lg h-[calc(100vh-32px)] fixed left-4 top-4 flex flex-col p-unit z-20 rounded-2xl border border-outline-variant/20"
-    :class="{ 'sidebar-minimized': isMinimized }"
+    class="sidebar-nav bg-surface/80 backdrop-blur-md shadow-lg h-[calc(100vh-32px)] fixed left-4 top-4 flex flex-col p-unit z-40 rounded-2xl border border-outline-variant/20"
+    :class="{ 'sidebar-minimized': isMinimized, 'sidebar-mobile-open': isMobileOpen }"
   >
-    <!-- Floating Toggle Button -->
+    <!-- Floating Toggle Button (desktop only) -->
     <button
-      class="absolute -right-5 w-10 h-10 bg-secondary-container text-on-secondary-container rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 group z-50 border border-outline-variant/20 top-8"
+      class="absolute -right-5 w-10 h-10 bg-secondary-container text-on-secondary-container rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 group z-50 border border-outline-variant/20 top-8 hidden lg:flex"
       @click="toggleSidebar"
     >
       <span
@@ -58,6 +76,14 @@ defineExpose({ isMinimized });
       <span
         class="absolute left-full ml-2 px-2 py-1 bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50"
       >{{ isMinimized ? 'Buka' : 'Tutup' }}</span>
+    </button>
+
+    <!-- Mobile Close Button -->
+    <button
+      class="absolute top-4 right-4 w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors lg:hidden z-50"
+      @click="closeMobile"
+    >
+      <span class="material-symbols-outlined text-[20px]">close</span>
     </button>
 
     <!-- Header (Expanded) -->
@@ -83,6 +109,7 @@ defineExpose({ isMinimized });
           :class="isActive(item.to())
             ? 'bg-primary-container scale-95 text-white'
             : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high'"
+          @click="closeMobile"
         >
           <span
             class="material-symbols-outlined"

@@ -22,11 +22,11 @@ const goToChatbot = () => {
   <!-- Global Component: Floating AI Chatbot -->
   <button
     :id="id ?? 'btn-ai-chatbot'"
-    class="fixed bottom-8 right-8 z-50 h-14 px-6 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center gap-3 hover:scale-105 hover:shadow-xl transition-all duration-200 group animate-pulse-custom"
+    class="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 h-12 md:h-14 px-4 md:px-6 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center gap-0 md:gap-3 hover:scale-105 hover:shadow-xl transition-all duration-200 group animate-pulse-custom"
     @click="goToChatbot"
   >
-    <span class="material-symbols-outlined text-3xl group-hover:hidden">smart_toy</span>
-    <span class="font-label-md text-label-md">Tanya AI Naviance</span>
+    <span class="material-symbols-outlined text-2xl md:text-3xl group-hover:hidden">smart_toy</span>
+    <span class="font-label-md text-label-md hidden md:block">Tanya AI Naviance</span>
   </button>
 </template>
 
