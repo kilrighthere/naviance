@@ -5,8 +5,8 @@ import { ref, onMounted, onUnmounted } from 'vue'
 const router = useRouter()
 
 // ─── Counting Animation ───────────────────────────
-const counters = ref({ users: 0, transactions: 0, accuracy: 0 })
-const counterTargets = { users: 10000, transactions: 50, accuracy: 99.2 }
+const counters = ref({ users: 0, transactions: 0, satisfaction: 0 })
+const counterTargets = { users: 10000, transactions: 50, satisfaction: 98 }
 const hasCounterAnimated = ref(false)
 
 function animateCounters() {
@@ -22,11 +22,11 @@ function animateCounters() {
     const ease = 1 - Math.pow(1 - progress, 3) // easeOutCubic
     counters.value.users = Math.round(counterTargets.users * ease)
     counters.value.transactions = Math.round(counterTargets.transactions * ease)
-    counters.value.accuracy = Math.round(counterTargets.accuracy * ease * 10) / 10
+    counters.value.satisfaction = Math.round(counterTargets.satisfaction * ease)
     if (step >= steps) {
       counters.value.users = counterTargets.users
       counters.value.transactions = counterTargets.transactions
-      counters.value.accuracy = counterTargets.accuracy
+      counters.value.satisfaction = counterTargets.satisfaction
       clearInterval(timer)
     }
   }, interval)
@@ -139,7 +139,7 @@ const isMobileNavOpen = ref(false)
             </h1>
 
             <p class="hero-subtitle">
-              Naviance membantu mahasiswa dan profesional muda mengelola keuangan secara otomatis — scan struk dengan OCR, dapatkan prediksi AI, dan wujudkan tujuan finansial Anda.
+              Naviance membantu mahasiswa dan profesional muda mengelola keuangan secara cerdas — catat transaksi via chatbot AI, kelola anggaran, dan wujudkan tujuan finansial Anda.
             </p>
 
             <div class="hero-cta-group">
@@ -198,23 +198,23 @@ const isMobileNavOpen = ref(false)
             </div>
 
             <!-- Floating Cards -->
-            <div class="floating-card card-prediction">
-              <div class="fc-icon fc-icon-purple">
-                <span class="material-symbols-outlined">trending_up</span>
+            <div class="floating-card card-chatbot">
+              <div class="fc-icon fc-icon-amber">
+                <span class="material-symbols-outlined">smart_toy</span>
               </div>
               <div class="fc-content">
-                <span class="fc-label">Prediksi AI</span>
-                <span class="fc-value">Rp 4.8M</span>
+                <span class="fc-label">AI Chatbot</span>
+                <span class="fc-value">Online ✓</span>
               </div>
             </div>
 
-            <div class="floating-card card-ocr">
-              <div class="fc-icon fc-icon-amber">
-                <span class="material-symbols-outlined">document_scanner</span>
+            <div class="floating-card card-analytics">
+              <div class="fc-icon fc-icon-purple">
+                <span class="material-symbols-outlined">insights</span>
               </div>
               <div class="fc-content">
-                <span class="fc-label">OCR Scan</span>
-                <span class="fc-value">Berhasil ✓</span>
+                <span class="fc-label">Analitik</span>
+                <span class="fc-value">+12% Hemat</span>
               </div>
             </div>
 
@@ -250,8 +250,8 @@ const isMobileNavOpen = ref(false)
           </div>
           <div class="metric-divider"></div>
           <div class="metric-item">
-            <span class="metric-number">{{ counters.accuracy }}%</span>
-            <span class="metric-label">Akurasi OCR</span>
+            <span class="metric-number">{{ counters.satisfaction }}%</span>
+            <span class="metric-label">Kepuasan Pengguna</span>
           </div>
           <div class="metric-divider"></div>
           <div class="metric-item">
@@ -273,52 +273,14 @@ const isMobileNavOpen = ref(false)
           </div>
 
           <div class="bento-grid">
-            <!-- Feature 1: OCR Scanning (wide) -->
-            <div class="bento-card bento-wide reveal-on-scroll" style="--delay: 0ms">
-              <div class="bento-accent-line accent-primary"></div>
-              <div class="bento-text">
-                <div class="bento-icon-wrap icon-bg-primary">
-                  <span class="material-symbols-outlined">document_scanner</span>
-                </div>
-                <h3 class="bento-title">Pencatatan Otomatis OCR</h3>
-                <p class="bento-desc">Pindai struk belanja secara instan. AI kami secara otomatis mengekstrak nama merchant, tanggal, dan total biaya dalam hitungan detik.</p>
-              </div>
-              <!-- Mini Mockup: Receipt scan -->
-              <div class="bento-mockup mockup-ocr">
-                <div class="ocr-receipt">
-                  <div class="ocr-receipt-header">
-                    <span class="material-symbols-outlined">receipt_long</span>
-                    <span>Struk Belanja</span>
-                  </div>
-                  <div class="ocr-receipt-line">
-                    <span>Starbucks Coffee</span>
-                    <span class="ocr-highlight">Rp 55.000</span>
-                  </div>
-                  <div class="ocr-receipt-line">
-                    <span>Tanggal</span>
-                    <span class="ocr-highlight">4 Jun 2026</span>
-                  </div>
-                  <div class="ocr-receipt-line">
-                    <span>Kategori</span>
-                    <span class="ocr-tag">Makanan & Minuman</span>
-                  </div>
-                  <div class="ocr-status">
-                    <span class="material-symbols-outlined">check_circle</span>
-                    Terdeteksi Otomatis
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Feature 2: AI Chatbot (wide) -->
-            <div class="bento-card bento-wide reveal-on-scroll" style="--delay: 100ms">
-              <div class="bento-accent-line accent-amber"></div>
+            <!-- Feature 1: AI Chatbot (wide) -->
+            <div class="bento-card reveal-on-scroll" style="--delay: 0ms">
               <div class="bento-text">
                 <div class="bento-icon-wrap icon-bg-amber">
                   <span class="material-symbols-outlined">smart_toy</span>
                 </div>
                 <h3 class="bento-title">Asisten AI (Chatbot)</h3>
-                <p class="bento-desc">Input transaksi berbasis NLP dan dapatkan saran keuangan cerdas langsung dari asisten virtual pribadi Anda.</p>
+                <p class="bento-desc">Input transaksi dengan bahasa alami dan dapatkan saran keuangan cerdas langsung dari asisten virtual pribadi Anda.</p>
               </div>
               <!-- Mini Mockup: Chat -->
               <div class="bento-mockup mockup-chat">
@@ -337,35 +299,37 @@ const isMobileNavOpen = ref(false)
               </div>
             </div>
 
-            <!-- Feature 3: AI Forecasting -->
-            <div class="bento-card reveal-on-scroll" style="--delay: 200ms">
-              <div class="bento-accent-line accent-indigo"></div>
+            <!-- Feature 2: Dashboard Analytics (wide) -->
+            <div class="bento-card reveal-on-scroll" style="--delay: 100ms">
               <div class="bento-text">
-                <div class="bento-icon-wrap icon-bg-indigo">
-                  <span class="material-symbols-outlined">trending_up</span>
+                <div class="bento-icon-wrap icon-bg-primary">
+                  <span class="material-symbols-outlined">dashboard</span>
                 </div>
-                <h3 class="bento-title">Prediksi Pengeluaran</h3>
-                <p class="bento-desc">Proyeksi AI untuk pengeluaran bulan depan berdasarkan pola historis Anda.</p>
+                <h3 class="bento-title">Dashboard Analitik</h3>
+                <p class="bento-desc">Pantau ringkasan keuangan lengkap dengan visualisasi tren pemasukan dan pengeluaran dalam satu tampilan interaktif.</p>
               </div>
-              <div class="bento-mockup mockup-forecast">
-                <div class="forecast-donut">
-                  <svg viewBox="0 0 36 36" class="donut-svg">
-                    <circle cx="18" cy="18" r="14" fill="none" stroke="#e4e2e3" stroke-width="3"></circle>
-                    <circle cx="18" cy="18" r="14" fill="none" stroke="#1e293b" stroke-width="3" stroke-dasharray="35 65" stroke-dashoffset="25" stroke-linecap="round"></circle>
-                    <circle cx="18" cy="18" r="14" fill="none" stroke="#fea619" stroke-width="3" stroke-dasharray="25 75" stroke-dashoffset="60" stroke-linecap="round"></circle>
-                    <circle cx="18" cy="18" r="14" fill="none" stroke="#00a472" stroke-width="3" stroke-dasharray="20 80" stroke-dashoffset="85" stroke-linecap="round"></circle>
-                  </svg>
-                  <div class="donut-center">
-                    <span class="donut-label">Total</span>
-                    <span class="donut-value">Rp 3.2M</span>
+              <div class="bento-mockup mockup-dashboard">
+                <div class="dash-mini-cards">
+                  <div class="dash-mini green-mini">
+                    <span class="material-symbols-outlined">arrow_upward</span>
+                    <div>
+                      <span class="dash-mini-label">Pemasukan</span>
+                      <span class="dash-mini-val">+12%</span>
+                    </div>
+                  </div>
+                  <div class="dash-mini red-mini">
+                    <span class="material-symbols-outlined">arrow_downward</span>
+                    <div>
+                      <span class="dash-mini-label">Pengeluaran</span>
+                      <span class="dash-mini-val">-3%</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Feature 4: Manajemen Anggaran -->
-            <div class="bento-card reveal-on-scroll" style="--delay: 300ms">
-              <div class="bento-accent-line accent-teal"></div>
+            <!-- Feature 3: Manajemen Anggaran -->
+            <div class="bento-card reveal-on-scroll" style="--delay: 200ms">
               <div class="bento-text">
                 <div class="bento-icon-wrap icon-bg-teal">
                   <span class="material-symbols-outlined">account_balance_wallet</span>
@@ -398,9 +362,8 @@ const isMobileNavOpen = ref(false)
               </div>
             </div>
 
-            <!-- Feature 5: Target Tabungan -->
-            <div class="bento-card reveal-on-scroll" style="--delay: 400ms">
-              <div class="bento-accent-line accent-emerald"></div>
+            <!-- Feature 4: Target Tabungan -->
+            <div class="bento-card reveal-on-scroll" style="--delay: 300ms">
               <div class="bento-text">
                 <div class="bento-icon-wrap icon-bg-emerald">
                   <span class="material-symbols-outlined">target</span>
@@ -426,36 +389,6 @@ const isMobileNavOpen = ref(false)
                     <div class="target-progress-info">
                       <span>Rp 9.000.000</span>
                       <span>3 bulan lagi</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Feature 6: Dashboard Analytics -->
-            <div class="bento-card reveal-on-scroll" style="--delay: 500ms">
-              <div class="bento-accent-line accent-slate"></div>
-              <div class="bento-text">
-                <div class="bento-icon-wrap icon-bg-slate">
-                  <span class="material-symbols-outlined">dashboard</span>
-                </div>
-                <h3 class="bento-title">Dashboard Analitik</h3>
-                <p class="bento-desc">Ringkasan keuangan lengkap dengan visualisasi tren 6 bulan.</p>
-              </div>
-              <div class="bento-mockup mockup-dashboard">
-                <div class="dash-mini-cards">
-                  <div class="dash-mini green-mini">
-                    <span class="material-symbols-outlined">arrow_upward</span>
-                    <div>
-                      <span class="dash-mini-label">Pemasukan</span>
-                      <span class="dash-mini-val">+12%</span>
-                    </div>
-                  </div>
-                  <div class="dash-mini red-mini">
-                    <span class="material-symbols-outlined">arrow_downward</span>
-                    <div>
-                      <span class="dash-mini-label">Pengeluaran</span>
-                      <span class="dash-mini-val">-3%</span>
                     </div>
                   </div>
                 </div>
@@ -496,10 +429,10 @@ const isMobileNavOpen = ref(false)
             <div class="step-card">
               <div class="step-number">2</div>
               <div class="step-icon-wrap">
-                <span class="material-symbols-outlined">document_scanner</span>
+                <span class="material-symbols-outlined">smart_toy</span>
               </div>
-              <h3 class="step-title">Scan Struk atau Chat AI</h3>
-              <p class="step-desc">Gunakan OCR untuk scan struk, atau input transaksi via chatbot AI dengan bahasa alami.</p>
+              <h3 class="step-title">Catat via Chatbot AI</h3>
+              <p class="step-desc">Input transaksi dengan bahasa alami melalui chatbot AI. Cukup ketik dan biarkan AI yang mencatat untuk Anda.</p>
             </div>
 
             <div class="step-connector">
@@ -514,8 +447,8 @@ const isMobileNavOpen = ref(false)
               <div class="step-icon-wrap step-icon-ai">
                 <span class="material-symbols-outlined">auto_awesome</span>
               </div>
-              <h3 class="step-title">Dapatkan Insight AI</h3>
-              <p class="step-desc">Prediksi pengeluaran, saran budgeting, dan analytics — semua ditenagai kecerdasan buatan.</p>
+              <h3 class="step-title">Kelola & Capai Target</h3>
+              <p class="step-desc">Atur anggaran, pantau pengeluaran, dan lacak progres target tabungan Anda secara real-time.</p>
             </div>
           </div>
         </div>
@@ -534,7 +467,7 @@ const isMobileNavOpen = ref(false)
           <div class="testimonials-grid reveal-on-scroll">
             <div class="testimonial-card">
               <div class="testimonial-stars">★★★★★</div>
-              <p class="testimonial-text">"Naviance benar-benar mengubah cara saya mengelola uang. Fitur OCR-nya akurat banget, tinggal foto struk langsung tercatat otomatis!"</p>
+              <p class="testimonial-text">"Naviance benar-benar mengubah cara saya mengelola uang. Chatbot AI-nya praktis banget, tinggal ketik langsung tercatat otomatis!"</p>
               <div class="testimonial-author">
                 <div class="testimonial-avatar avatar-1">AR</div>
                 <div>
@@ -558,7 +491,7 @@ const isMobileNavOpen = ref(false)
 
             <div class="testimonial-card">
               <div class="testimonial-stars">★★★★★</div>
-              <p class="testimonial-text">"Prediksi pengeluaran bulan depannya selalu spot-on. Sekarang saya bisa plan budget dengan jauh lebih percaya diri."</p>
+              <p class="testimonial-text">"Fitur manajemen anggarannya luar biasa! Sekarang saya bisa plan budget per kategori dan tahu persis ke mana uang saya pergi."</p>
               <div class="testimonial-author">
                 <div class="testimonial-avatar avatar-3">BP</div>
                 <div>
@@ -1105,16 +1038,16 @@ const isMobileNavOpen = ref(false)
   z-index: 5;
 }
 
-.card-prediction {
-  top: 15%;
-  right: -20px;
-  animation: floatA 4s ease-in-out infinite;
-}
-
-.card-ocr {
+.card-chatbot {
   bottom: 30%;
   left: -30px;
   animation: floatB 5s ease-in-out infinite 0.5s;
+}
+
+.card-analytics {
+  top: 15%;
+  right: -20px;
+  animation: floatA 4s ease-in-out infinite;
 }
 
 .card-budget {
@@ -1295,7 +1228,7 @@ const isMobileNavOpen = ref(false)
 
 .bento-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
 }
 
@@ -1320,20 +1253,6 @@ const isMobileNavOpen = ref(false)
   grid-column: span 2;
 }
 
-.bento-accent-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  opacity: 0.6;
-}
-.accent-primary { background: linear-gradient(90deg, var(--primary), transparent); }
-.accent-amber { background: linear-gradient(90deg, var(--accent-amber), transparent); }
-.accent-indigo { background: linear-gradient(90deg, var(--accent-indigo), transparent); }
-.accent-teal { background: linear-gradient(90deg, var(--accent-teal), transparent); }
-.accent-emerald { background: linear-gradient(90deg, var(--accent-emerald), transparent); }
-.accent-slate { background: linear-gradient(90deg, var(--primary-container), transparent); }
 
 .bento-icon-wrap {
   width: 48px; height: 48px;
@@ -1373,59 +1292,6 @@ const isMobileNavOpen = ref(false)
   flex: 1;
 }
 
-/* ─── OCR Mockup ─── */
-.ocr-receipt {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.ocr-receipt-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--primary);
-  padding-bottom: 8px;
-  border-bottom: 1px dashed rgba(197, 198, 205, 0.4);
-}
-.ocr-receipt-header .material-symbols-outlined { font-size: 18px; }
-
-.ocr-receipt-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: var(--on-surface-variant);
-}
-.ocr-highlight {
-  font-weight: 700;
-  color: var(--primary);
-  background: rgba(254, 166, 25, 0.1);
-  padding: 2px 8px;
-  border-radius: 6px;
-}
-.ocr-tag {
-  font-size: 10px;
-  font-weight: 700;
-  background: rgba(0, 164, 114, 0.1);
-  color: var(--tertiary-green);
-  padding: 3px 10px;
-  border-radius: 9999px;
-}
-.ocr-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--tertiary-green);
-  background: rgba(0, 164, 114, 0.08);
-  padding: 8px 12px;
-  border-radius: 10px;
-  margin-top: 4px;
-}
-.ocr-status .material-symbols-outlined { font-size: 16px; }
 
 /* ─── Chat Mockup ─── */
 .mockup-chat {

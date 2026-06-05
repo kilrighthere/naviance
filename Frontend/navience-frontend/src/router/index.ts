@@ -94,11 +94,11 @@ router.beforeEach(async (to, from, next) => {
   const userId = session?.user?.id
 
   if (to.path === '/' && userId) {
-    return next({ path: `/dashboard/${userId}` })
+    return next({ path: `/chatbot/${userId}` })
   }
 
   if (to.meta.requiresGuest && userId) {
-    return next({ path: `/dashboard/${userId}` })
+    return next({ path: `/chatbot/${userId}` })
   }
 
   if (
@@ -110,7 +110,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.requiresAuth && userId && to.params.userId !== userId) {
-    return next({ path: `/dashboard/${userId}` })
+    return next({ path: `/chatbot/${userId}` })
   }
 
   next()
