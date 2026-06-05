@@ -48,7 +48,7 @@ export const getAdaptivePlanning = async (req, res, next) => {
                 message: validation.error.message
             });
         }
-        const planning = await AdaptivePlanning(payload);
+        const planning = await adaptivePlanningService(payload);
         if (planning.error) {
             return res.status(500).json({
                 status: "failed",
