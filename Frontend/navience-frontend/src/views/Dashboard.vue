@@ -334,10 +334,12 @@ watch(userID, (id) => {
 });
 
 // Re-fetch prediction when selected target changes on dashboard
+// Guard: skip during initial page load to avoid duplicating the call in loadData
 watch(
-  () => targetStore.selected,
-  async (newTarget) => {
-    if (newTarget) {
+  () => targetStore.selected?.id_target,
+  async (newId) => {
+    if (isPageLoading.value) return;
+    if (newId) {
       await adaptiveStore.predict();
     } else {
       adaptiveStore.reset();
