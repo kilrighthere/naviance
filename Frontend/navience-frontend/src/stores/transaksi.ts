@@ -4,7 +4,7 @@ import { supabase } from "@/services/supabase";
 import type { Transaksi, JenisTransaksi } from "@/types/transaksi";
 import axios from "axios";
 
-const API_BASE = "https://naviance-production-5ff4.up.railway.app/api/v1";
+const API_BASE = ((import.meta.env.VITE_API_BASE_URL as string) || "https://naviance-production-5ff4.up.railway.app/api/v1").replace(/\/$/, "");
 
 // Helper untuk ambil access token terbaru dari Supabase session
 const getAccessToken = async (): Promise<string> => {
@@ -36,6 +36,7 @@ const buildRequestBody = (p: Partial<Transaksi>) => ({
 export const useTransaksiStore = defineStore('transaksi', () => {
     const items = ref<Transaksi[]>([]);
     const selected = ref<Transaksi | null>(null);
+    const currentUserId = ref('');
     const payload = ref<Partial<Transaksi>>({
         id_pengguna: '',
         id_target: null,
@@ -214,14 +215,16 @@ export const useTransaksiStore = defineStore('transaksi', () => {
     async function fetchAll(userId: string) {
         setLoading(true);
         setError(null);
+        currentUserId.value = userId;
         try {
             const { data, error } = await supabase
                 .from('transaksi')
-                .select('*')
-                .eq('id_pengguna', userId);
+                .select('*, kategori(id_kategori, nama_kategori)')
+                .eq('id_pengguna', userId)
+                .order('tanggal_transaksi', { ascending: false });
 
             if (error) { setError(error.message); throw error; }
-            items.value = data;
+            items.value = data ?? [];
         } catch (error) {
             if (!storeError.value && error instanceof Error) setError(error.message);
             throw error;
@@ -273,7 +276,7 @@ export const useTransaksiStore = defineStore('transaksi', () => {
             );
 
             resetPayload();
-            if (data) items.value = [data, ...items.value];
+            if (currentUserId.value) await fetchAll(currentUserId.value);
         } catch (error) {
             const message = axios.isAxiosError(error)
                 ? (error.response?.data?.message ?? error.response?.data?.error?.message ?? error.message)
@@ -305,11 +308,7 @@ export const useTransaksiStore = defineStore('transaksi', () => {
             );
 
             resetPayload();
-            if (data) {
-                items.value = items.value.map(item =>
-                    item.id_transaksi === data.id_transaksi ? data : item
-                );
-            }
+            if (currentUserId.value) await fetchAll(currentUserId.value);
         } catch (error) {
             const message = axios.isAxiosError(error)
                 ? (error.response?.data?.message ?? error.response?.data?.error?.message ?? error.message)
@@ -331,7 +330,7 @@ export const useTransaksiStore = defineStore('transaksi', () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            items.value = items.value.filter(item => item.id_transaksi !== transaksiId);
+            if (currentUserId.value) await fetchAll(currentUserId.value);
         } catch (error) {
             const message = axios.isAxiosError(error)
                 ? (error.response?.data?.message ?? error.response?.data?.error?.message ?? error.message)
@@ -348,6 +347,7 @@ export const useTransaksiStore = defineStore('transaksi', () => {
     return {
         items,
         selected,
+        currentUserId,
         payload,
         isLoading,
         storeError,

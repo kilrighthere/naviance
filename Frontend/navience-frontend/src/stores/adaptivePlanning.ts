@@ -33,7 +33,7 @@ export interface AdaptiveResult {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const BASE_URL = "https://naviance-production-5ff4.up.railway.app/api/v1";
+const BASE_URL = ((import.meta.env.VITE_API_BASE_URL as string) || "https://naviance-production-5ff4.up.railway.app/api/v1").replace(/\/$/, "");
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 

@@ -344,6 +344,18 @@ watch(
     }
   }
 );
+
+// Re-run ML predictions whenever transactions are added/removed after initial load
+watch(
+  () => transaksiStore.items.length,
+  async (newLen, oldLen) => {
+    if (oldLen === undefined || isPageLoading.value) return;
+    await patternStore.classify();
+    if (targetStore.selected) {
+      await adaptiveStore.predict();
+    }
+  }
+);
 </script>
 
 <template>
