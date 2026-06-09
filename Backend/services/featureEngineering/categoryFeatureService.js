@@ -34,6 +34,11 @@ const CATEGORY_NAMES = [
     "transportasi"
 ];
 
+const toNumber = (value) => {
+    const normalized = Number(value);
+    return Number.isFinite(normalized) ? normalized : 0;
+};
+
 const CATEGORY_MAP = {
     "belanja": "Belanja",
     "bonus": "Bonus",
@@ -64,7 +69,7 @@ export const categoryFeature = (transactions) => {
 
         if (!category) continue;
 
-        result[category] += trx.nominal || 0;
+        result[category] += toNumber(trx.nominal);
         result[`count_${category}`] += 1;
     }
 

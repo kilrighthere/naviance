@@ -1,6 +1,10 @@
 import * as math from "mathjs";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const toNumber = (value) => {
+    const normalized = Number(value);
+    return Number.isFinite(normalized) ? normalized : 0;
+};
 
 // const calculateAvg2TotalTabungan = (transactions) => {
 
@@ -111,7 +115,7 @@ const calculateAvg2TotalTabungan = (transactions) => {
         if (trx.jenis_transaksi.toLowerCase() !== "tabungan") continue;
         const trxDate = new Date(trx.tanggal_transaksi);
         const key = `${trxDate.getFullYear()}-${String(trxDate.getMonth()+1).padStart(2,"0")}`;
-        monthlySaving[key] = (monthlySaving[key] || 0) + trx.nominal;
+        monthlySaving[key] = (monthlySaving[key] || 0) + toNumber(trx.nominal);
     }
 
     // ✅ Selalu evaluasi tepat 2 bulan: bulan ini dan bulan lalu
@@ -142,7 +146,7 @@ export const buildGoalFeatures = (target, transaction) => {
 
     const jml_tabungan = transaction.reduce((sum, trx) => {
         if (trx.jenis_transaksi.toLowerCase() === "tabungan") {
-            sum += trx.nominal;
+            sum += toNumber(trx.nominal);
         }
         return sum;
     }, 0);

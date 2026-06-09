@@ -102,7 +102,7 @@ export const useAdaptiveStore = defineStore("adaptive", () => {
     // Gracefully skip if there is no active session yet
     if (!token) {
       setError("Sesi tidak ditemukan. Silakan login ulang.");
-      return;
+      return false;
     }
 
     setLoading(true);
@@ -125,8 +125,10 @@ export const useAdaptiveStore = defineStore("adaptive", () => {
 
       if (response.data.status === "success") {
         result.value = response.data.data;
+        return true;
       } else {
         setError("Respons API tidak valid.");
+        return false;
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -139,7 +141,7 @@ export const useAdaptiveStore = defineStore("adaptive", () => {
       } else {
         setError("Terjadi kesalahan tidak diketahui.");
       }
-      throw error;
+      return false;
     } finally {
       setLoading(false);
     }

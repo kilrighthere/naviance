@@ -70,13 +70,14 @@ const CONFIG: Record<
 export const usePatternStore = defineStore("pattern", () => {
   const isLoading = ref(false);
   const storeError = ref<string | null>(null);
+  const noData = ref(false);
   const result = ref<PatternResult | null>(null);
 
   // ─── Helpers ────────────────────────────────────────────────────────────
 
   const setLoading = (v: boolean) => { isLoading.value = v; };
   const setError   = (v: string | null) => { storeError.value = v; };
-  const reset      = () => { result.value = null; storeError.value = null; };
+  const reset      = () => { result.value = null; storeError.value = null; noData.value = false; };
 
   // ─── Computed ────────────────────────────────────────────────────────────
 
@@ -93,9 +94,27 @@ export const usePatternStore = defineStore("pattern", () => {
   );
 
   /**
-   * Three probability bars for Healthy / Moderate / Critical.
-   * Includes display label and resolved Tailwind classes.
+   * Single top-probability bar — the class with the highest probability.
+   * Prevents ambiguous multi-bar representation on the dashboard.
    */
+  const topBar = computed(() => {
+    if (!result.value) return null;
+    const keys: HealthClassification[] = ["Healthy", "Moderate", "Critical"];
+    const labels = ["Sehat", "Moderat", "Kritis"];
+    const [h, m, c] = result.value.probabilities;
+    const values = [h, m, c];
+    const maxIdx = values.indexOf(Math.max(...values));
+    const key = keys[maxIdx]!;
+    return {
+      key,
+      labelId: labels[maxIdx]!,
+      value: values[maxIdx]!,
+      pct: (values[maxIdx]! * 100).toFixed(0),
+      bar: CONFIG[key].colorBar,
+    };
+  });
+
+  /** @deprecated use topBar — kept for backward compat */
   const probabilityBars = computed(() => {
     if (!result.value) return [];
     const [h, m, c] = result.value.probabilities;
@@ -133,18 +152,22 @@ export const usePatternStore = defineStore("pattern", () => {
 
       if (response.data.status === "success") {
         result.value = response.data.data;
+        noData.value = false;
       } else {
-        setError("Respons API tidak valid.");
+        setError("Respons tidak valid dari server.");
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        const msg =
-          (error.response?.data as { message?: string })?.message ??
-          error.message;
-        setError(msg);
-      } else if (error instanceof Error) {
-        setError(error.message);
+        const responseData = error.response?.data as { status?: string; message?: string } | undefined;
+        if (responseData?.status === "no_data") {
+          noData.value = true;
+          setError(null);
+        } else {
+          noData.value = false;
+          setError("Kondisi keuangan belum dapat dianalisis. Coba lagi nanti.");
+        }
       } else {
+        noData.value = false;
         setError("Terjadi kesalahan tidak diketahui.");
       }
     } finally {
@@ -156,10 +179,12 @@ export const usePatternStore = defineStore("pattern", () => {
     // state
     isLoading,
     storeError,
+    noData,
     result,
     // computed
     config,
     confidenceFormatted,
+    topBar,
     probabilityBars,
     // actions
     classify,

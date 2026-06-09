@@ -4,7 +4,45 @@ export const validateAdaptivePlaningPayload = (payload) => {
         return {
             error: {
                 statusCode: 400,
-                message: "Payload AdaptivePlaninging tidak ditemukan"
+                message: "Data tidak lengkap untuk membuat rencana keuangan adaptif."
+            }
+        };
+    }
+
+    // Business rule: target dan deadline harus valid sebelum validasi field lain
+    if (!payload.target_tabungan || payload.target_tabungan <= 0) {
+        return {
+            error: {
+                statusCode: 400,
+                message: "Target tabungan harus lebih besar dari 0. Silakan periksa kembali target yang telah dibuat."
+            }
+        };
+    }
+
+    if (!payload.deadline_bulan || payload.deadline_bulan <= 0) {
+        return {
+            error: {
+                statusCode: 400,
+                message: "Deadline target tidak valid. Pastikan tanggal deadline belum terlewati."
+            }
+        };
+    }
+
+    if (payload.sisa_deadline_bulan <= 0) {
+        return {
+            error: {
+                statusCode: 400,
+                message: "Target tabungan sudah melewati batas waktu (deadline). Silakan perbarui target dengan deadline yang baru."
+            }
+        };
+    }
+
+    // Business rule: pemasukan harus ada agar rasio dapat dihitung
+    if (!payload.total_pemasukan || payload.total_pemasukan <= 0) {
+        return {
+            error: {
+                statusCode: 400,
+                message: "Belum ada transaksi pemasukan yang tercatat. Tambahkan pemasukan agar rencana keuangan dapat dianalisis."
             }
         };
     }
@@ -50,7 +88,7 @@ export const validateAdaptivePlaningPayload = (payload) => {
             return {
                 error: {
                     statusCode: 400,
-                    message: `Feature '${field}' bernilai null atau undefined`
+                    message: `Data keuangan tidak lengkap (${field}). Pastikan semua data transaksi sudah tercatat dengan benar.`
                 }
             };
         }
@@ -59,7 +97,7 @@ export const validateAdaptivePlaningPayload = (payload) => {
             return {
                 error: {
                     statusCode: 400,
-                    message: `Feature '${field}' harus berupa number`
+                    message: `Data keuangan tidak valid (${field}). Pastikan semua nilai transaksi berupa angka.`
                 }
             };
         }
@@ -68,7 +106,7 @@ export const validateAdaptivePlaningPayload = (payload) => {
             return {
                 error: {
                     statusCode: 400,
-                    message: `Feature '${field}' bernilai NaN`
+                    message: "Terjadi kesalahan saat menghitung data keuangan. Pastikan data transaksi pemasukan dan pengeluaran sudah lengkap."
                 }
             };
         }
@@ -77,37 +115,10 @@ export const validateAdaptivePlaningPayload = (payload) => {
             return {
                 error: {
                     statusCode: 400,
-                    message: `Feature '${field}' tidak valid (Infinity)`
+                    message: "Terjadi kesalahan perhitungan keuangan. Pastikan terdapat transaksi pemasukan agar rasio dapat dihitung."
                 }
             };
         }
-    }
-
-    if (payload.target_tabungan <= 0) {
-        return {
-            error: {
-                statusCode: 400,
-                message: "Target tabungan harus lebih besar dari 0"
-            }
-        };
-    }
-
-    if (payload.deadline_bulan <= 0) {
-        return {
-            error: {
-                statusCode: 400,
-                message: "Deadline bulan harus lebih besar dari 0"
-            }
-        };
-    }
-
-    if (payload.sisa_deadline_bulan <= 0) {
-        return {
-            error: {
-                statusCode: 400,
-                message: "Target telah melewati deadline"
-            }
-        };
     }
 
     return {

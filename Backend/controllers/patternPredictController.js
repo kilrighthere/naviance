@@ -19,7 +19,14 @@ export const predictPattern = async (req,res,next) => {
         if (trxResult.error) {
             return res.status(400).json({
                 status: "failed",
-                message: trxResult.error.message
+                message: "Gagal mengambil data transaksi. Silakan coba lagi."
+            });
+        }
+
+        if (!trxResult.data || trxResult.data.length === 0) {
+            return res.status(400).json({
+                status: "no_data",
+                message: "Belum ada data transaksi dalam 30 hari terakhir. Tambahkan transaksi untuk melihat kondisi kesehatan keuangan Anda."
             });
         }
 

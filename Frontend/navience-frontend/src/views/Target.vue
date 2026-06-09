@@ -34,18 +34,13 @@ onMounted(async () => {
       console.error(e);
     }
   }
-
-  // Only call adaptive predict when there is an active target
-  if (targetStore.selected) {
-    await adaptiveStore.predict();
-  }
 });
 
 // Re-run prediction whenever the selected target changes (e.g. after create)
 watch(
-  () => targetStore.selected,
-  async (newTarget) => {
-    if (newTarget) {
+  () => targetStore.selected?.id_target,
+  async (newTargetId) => {
+    if (newTargetId) {
       await adaptiveStore.predict();
     } else {
       adaptiveStore.reset();

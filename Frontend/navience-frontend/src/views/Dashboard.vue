@@ -77,7 +77,8 @@ const aiInsightText = computed(() => {
   if (adaptiveStore.isLoading) return 'Menganalisis data keuangan Anda...';
   if (adaptiveStore.storeError) return 'Tidak dapat memuat insight saat ini.';
   if (!adaptiveStore.result) {
-    return `Alokasikan sisa anggaran Rp ${totalSisaAnggaran.value.toLocaleString('id-ID')} bulan ini untuk mencapai target 15% lebih cepat.`;
+    // return `Alokasikan sisa anggaran Rp ${totalSisaAnggaran.value.toLocaleString('id-ID')} bulan ini untuk mencapai target 15% lebih cepat.`;
+    return "Belum terdapat data transaksi untuk dianalisis saat ini "
   }
 
   const pred = adaptiveStore.result.prediction;
@@ -405,6 +406,22 @@ watch(
             </div>
           </div>
 
+          <!-- No data state -->
+          <div
+            v-else-if="patternStore.noData"
+            class="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-4 flex items-center gap-3"
+          >
+            <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center shrink-0 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[22px]">bar_chart</span>
+            </div>
+            <div>
+              <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">AI · Kondisi Keuangan</p>
+              <p class="font-body-md text-body-md text-on-surface-variant text-sm mt-0.5">
+                Belum ada transaksi yang tercatat. Tambahkan transaksi untuk melihat kondisi kesehatan keuangan Anda.
+              </p>
+            </div>
+          </div>
+
           <!-- Result -->
           <div
             v-else-if="patternStore.result && patternStore.config"
@@ -441,27 +458,23 @@ watch(
               </div>
             </div>
 
-            <!-- Right: probability mini-bars + confidence -->
-            <div class="shrink-0 flex flex-col gap-1.5 min-w-[160px]">
-              <div
-                v-for="bar in patternStore.probabilityBars"
-                :key="bar.key"
-                class="flex items-center gap-2"
-              >
+            <!-- Right: top-probability bar only -->
+            <div v-if="patternStore.topBar" class="shrink-0 flex flex-col gap-1.5 min-w-[160px]">
+              <div class="flex items-center gap-2">
                 <span class="font-label-sm text-label-sm text-on-surface-variant w-14 text-right">
-                  {{ bar.labelId }}
+                  {{ patternStore.topBar.labelId }}
                 </span>
                 <div class="flex-1 h-1.5 bg-surface-variant rounded-full overflow-hidden">
                   <div
                     class="h-full rounded-full transition-all duration-700"
-                    :class="bar.bar"
-                    :style="{ width: bar.pct + '%' }"
+                    :class="patternStore.topBar.bar"
+                    :style="{ width: patternStore.topBar.pct + '%' }"
                   ></div>
                 </div>
                 <span
                   class="font-label-sm text-label-sm w-8 text-left"
                   :class="patternStore.config.colorText"
-                >{{ bar.pct }}%</span>
+                >{{ patternStore.topBar.pct }}%</span>
               </div>
               <p class="font-label-sm text-label-sm text-outline text-right mt-1">
                 Confidence {{ patternStore.confidenceFormatted }}

@@ -79,33 +79,32 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   const {
     data: { session }
   } = await supabase.auth.getSession()
   const userId = session?.user?.id
 
   if (to.path === '/' && userId) {
-    return next({ path: `/chatbot/${userId}` })
+    return { path: `/chatbot/${userId}` }
   }
 
   if (to.meta.requiresGuest && userId) {
-    return next({ path: `/chatbot/${userId}` })
+    return { path: `/chatbot/${userId}` }
   }
 
   if (
     to.meta.requiresAuth &&
     !session
   ) {
-    next('/login')
-    return
+    return '/login'
   }
 
   if (to.meta.requiresAuth && userId && to.params.userId !== userId) {
-    return next({ path: `/chatbot/${userId}` })
+    return { path: `/chatbot/${userId}` }
   }
 
-  next()
+  return true
 })
 
 export default router

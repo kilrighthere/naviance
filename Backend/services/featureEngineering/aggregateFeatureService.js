@@ -1,5 +1,10 @@
 import * as math from "mathjs";
 
+const toNumber = (value) => {
+    const normalized = Number(value);
+    return Number.isFinite(normalized) ? normalized : 0;
+};
+
 export const buildAggregateFeatures = (transaction) => {
     const featureSum = {
         total_pemasukan: 0,
@@ -10,20 +15,21 @@ export const buildAggregateFeatures = (transaction) => {
     }
 
     for (const trx of transaction){
+        const nominal = toNumber(trx.nominal);
         featureSum.jumlah_transaksi += 1;
-        featureSum.total_nominal += trx.nominal
+        featureSum.total_nominal += nominal;
         if (trx.jenis_transaksi === "pemasukan") {
-            featureSum.total_pemasukan += trx.nominal;
+            featureSum.total_pemasukan += nominal;
         }
         if (trx.jenis_transaksi === "pengeluaran") {
-            featureSum.total_pengeluaran += trx.nominal;
+            featureSum.total_pengeluaran += nominal;
         }
         if (trx.jenis_transaksi === "tabungan") {
-            featureSum.total_tabungan_investasi += trx.nominal;
+            featureSum.total_tabungan_investasi += nominal;
         }
     }
 
-    const values = transaction.map(t => t.nominal);
+    const values = transaction.map(t => toNumber(t.nominal));
     const median = values.length > 0 ? math.median(values) : 0;
     const rata_rata_nominal = values.length > 0 ? math.mean(values) : 0;
     const max_value = values.length > 0 ? math.max(values) : 0;

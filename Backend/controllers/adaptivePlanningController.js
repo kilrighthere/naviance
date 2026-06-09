@@ -16,14 +16,30 @@ export const getAdaptivePlanning = async (req, res, next) => {
         if (transaction.error) {
             return res.status(400).json({
                 status: "failed",
-                message: transaction.error.message
+                message: "Gagal mengambil data transaksi. Silakan coba lagi."
             });
         }
+
+        if (!transaction.data || transaction.data.length === 0) {
+            return res.status(400).json({
+                status: "failed",
+                message: "Belum ada data transaksi dalam 30 hari terakhir. Tambahkan transaksi terlebih dahulu untuk mendapatkan rencana keuangan adaptif."
+            });
+        }
+
+        const hasIncome = transaction.data.some(t => t.jenis_transaksi === "pemasukan");
+        if (!hasIncome) {
+            return res.status(400).json({
+                status: "failed",
+                message: "Belum ada transaksi pemasukan yang tercatat dalam 30 hari terakhir. Tambahkan pemasukan agar analisis keuangan dapat dihitung dengan akurat."
+            });
+        }
+
         const activeTarget = await getActiveTarget(accessToken, userId);
         if (activeTarget.error) {
             return res.status(400).json({
                 status: "failed",
-                message: activeTarget.error.message
+                message: "Belum ada target tabungan yang aktif. Silakan buat target tabungan terlebih dahulu."
             });
         }
 
